@@ -44,6 +44,10 @@ export const Home = () => {
             alert("You do not have permission to access that page!")
         }
     }
+
+    const gotopythonpage = () => {
+        navigate("/Python")
+    }
     
     return (
         <div>       
@@ -59,7 +63,8 @@ export const Home = () => {
                 </div>
             </div>
             <div className='container'>
-                <a className="titles">Enrolled Class</a>
+                <a className="titles">Avalible Class</a><br /><br />
+                <button className="button2" onClick={gotopythonpage}>Python Programs</button>
             </div>
         </div>
     )

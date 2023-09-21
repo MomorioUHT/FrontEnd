@@ -19,3 +19,7 @@ export interface UserDetail {
     user_role: string;
     session_id: string;
 }
+
+export interface ResultDetail {
+    result: string
+}

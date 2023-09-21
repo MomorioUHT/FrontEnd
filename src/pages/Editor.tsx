@@ -20,7 +20,6 @@ export const Editor = () => {
     const [username, setUsername] = useState('')
     const [fullname, setFullname] = useState('')
     const [role, setRole] = useState('')
-    const [sessionID, setSessionID] = useState('')
 
     const [code, setCode] = useState('')
     const [input, setInput] = useState('')
@@ -39,7 +38,6 @@ export const Editor = () => {
             setUsername(res.data[0].user_name)
             setFullname(res.data[0].user_fullname)
             setRole(res.data[0].user_role)
-            setSessionID(res.data[0].session_id)
         })
     }, [])
 

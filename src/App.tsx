@@ -6,6 +6,7 @@ import { Users } from './pages/users';
 import { Home } from './pages/homepage';
 import { AdminDashboard } from './pages/Admindashboard';
 import { Editor } from './pages/Editor';
+import { CreateProblem } from './pages/CreateProblem';
 
 
 function App() {
@@ -17,8 +18,9 @@ function App() {
         <Route path="Register" element={<Register />} />
         <Route path="Login" element={<Login />} />
         <Route path="AdminDashboard" element={<AdminDashboard />} />
-        <Route path="Users" element={<Users />} />
+        <Route path="AdminDashboard/Users" element={<Users />} />
         <Route path="Editor" element={<Editor />} />
+        <Route path="AdminDashboard/CreateProblem" element={<CreateProblem />} />
       </Routes>
     </div>
   );

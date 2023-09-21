@@ -48,7 +48,7 @@ export const Users = () => {
         })
     }
 
-    const gotohomepage = () => {
+    const gobacktoadmin = () => {
         navigate('/AdminDashboard')
     }
 
@@ -81,7 +81,7 @@ export const Users = () => {
                     }
                 </tbody>
             </table>
-            <button className="button" onClick={gotohomepage}>Go Back</button>
+            <button className="button" onClick={gobacktoadmin}>Go Back</button>
         </div>
     )
 }

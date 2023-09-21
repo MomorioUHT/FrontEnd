@@ -13,7 +13,7 @@ export const AdminDashboard = () => {
 
     useEffect(() => {
         axios.get<UserDetail[] | "NOT_LOGGEDIN" | "SERVER_SIDE_ERROR">("http://localhost:8000/checkLoginSession", {withCredentials: true}).then(res => {
-            if (res.data == "NOT_LOGGEDIN" || res.data == "SERVER_SIDE_ERROR") {
+            if (res.data === "NOT_LOGGEDIN" || res.data === "SERVER_SIDE_ERROR") {
                 navigate("/Login")
                 return
             }
@@ -25,7 +25,7 @@ export const AdminDashboard = () => {
         })
 
         axios.get<UserDetail[] | "ROLE_IS_ADMIN" | "ROLE_ISNOT_ADMIN" | "SERVER_SIDE_ERROR">("http://localhost:8000/administrator", {withCredentials: true}).then(res => {
-            if (res.data == "ROLE_ISNOT_ADMIN" || res.data == "SERVER_SIDE_ERROR") {
+            if (res.data === "ROLE_ISNOT_ADMIN" || res.data === "SERVER_SIDE_ERROR") {
                 navigate("/login")
             }
         })
@@ -47,11 +47,15 @@ export const AdminDashboard = () => {
     }
 
     const gotouserpage = () => {
-        navigate('/Users')
+        navigate('/AdminDashboard/Users')
     }
 
     const gotoeditor = () => {
         navigate("/Editor")
+    }
+
+    const gotocreateproblem = () => {
+        navigate("/AdminDashboard/CreateProblem")
     }
 
     return (
@@ -65,9 +69,6 @@ export const AdminDashboard = () => {
                 <div className="leftnav">
                     <button className="button" onClick={gotohomepage}>Home</button>
                 </div>
-                <div className="leftnav">
-                    <button className="button" onClick={gotouserpage}>Manage Users</button>
-                </div>
                 <div className="rightnav">
                     <button className="button" onClick={logout}>Log out</button>
                 </div>
@@ -78,6 +79,8 @@ export const AdminDashboard = () => {
             <div className="container2">
                 <a className="titles">Administrator's Dashboard</a><br /><br />
                 <a className="titles">{username} ({fullname})</a><br /><br />
+                <button className="button2" onClick={gotouserpage}>Manage Users</button><br /><br />
+                <button className="button2" onClick={gotocreateproblem}>Create</button><br /><br />
                 <a className="smallText">Role = {role}</a><br />
                 <a className="smallText">Session ID = {sessionID}</a><br />
             </div>
