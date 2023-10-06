@@ -7,6 +7,8 @@ jobs:
     steps:
       - name: Trying to run docker
         run: docker ps
+      - name: checkout repo
+        run: git clone https://github.com/MomorioUHT/FrontEnd.git
       - name: Watch file
         run: ls -la
 
