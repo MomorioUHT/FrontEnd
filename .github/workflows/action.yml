@@ -33,5 +33,8 @@ jobs:
           host: ${{ secrets.HOST }}
           user: ubuntu
           key: ${{ secrets.KEY }}
-          command: docker ps
-          
+          command: |
+            docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+            docker pull glacier23/lab01website:latest
+            docker rm -f lab01frontend
+            docker run --network lab01network --name lab01website --env REACT_APP_API_ENDPOINT=http://lab.skytalemc.com:8000 -p 3000:3000 -d glacier23/lab01website:latest
