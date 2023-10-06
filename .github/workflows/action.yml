@@ -8,7 +8,7 @@ jobs:
       - name: Trying to run docker
         run: docker ps
       - name: checkout repo
-        run: actions/checkout@v2.3.4
+        uses: actions/checkout@v2.3.4
       - name: Watch file
         run: ls -la
 
