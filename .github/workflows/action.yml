@@ -40,5 +40,5 @@ jobs:
           command: |
             docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
             docker pull glacier23/lab01website:${{ steps.short-sha.outputs.sha }}
-            docker rm -f lab01website
+            docker rm -f lab01website || true
             docker run --network lab01network --name lab01website --env REACT_APP_API_ENDPOINT=http://lab.skytalemc.com:8000 -p 3000:3000 -d glacier23/lab01website:${{ steps.short-sha.outputs.sha }}
