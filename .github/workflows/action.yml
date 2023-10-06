@@ -28,10 +28,12 @@ jobs:
     runs-on: ubuntu-latest
     name: deploy docker
     steps:
-      - uses: appleboy/ssh-action@v1.0.0
+      - name: ssh
+        uses: fifsky/ssh-action@master 
         with:
+          command: echo "HELLY"
           host: ${{ secrets.HOST }}
-          username: ubuntu
+          user: ubuntu
           key: ${{ secrets.KEY }}
           port: 22
           
