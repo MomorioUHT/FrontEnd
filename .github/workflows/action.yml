@@ -8,5 +8,5 @@ jobs:
       - name: Trying to run docker
         run: docker ps
       - name: Watch file
-        run: ls
+        run: ls -la
 
