@@ -1,28 +1,31 @@
 import axios from "axios";
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom";
-import { UserDetail} from "./hook"
+import { UserDetail} from "../hook"
 
 export const Users = () => {
     const navigate = useNavigate();
     const [userList, setUserList] = useState<UserDetail[]>([])
+    const [displaying, setDisplaying] = useState('▶ Waiting for a command...')
+
+    const BACKEND_API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT
 
     useEffect(() => {
-        axios.get<UserDetail[] | "NOT_LOGGEDIN" | "SERVER_SIDE_ERROR">("http://localhost:8000/checkLoginSession", {withCredentials: true}).then(res => {
+        axios.get<UserDetail[] | "NOT_LOGGEDIN" | "SERVER_SIDE_ERROR">(`${BACKEND_API_ENDPOINT}/checkLoginSession`, {withCredentials: true}).then(res => {
             if (res.data === "NOT_LOGGEDIN" || res.data === "SERVER_SIDE_ERROR") {
                 navigate("/Login")
                 return
             }
         })
 
-        axios.get<UserDetail[] | "ROLE_IS_ADMIN" | "ROLE_ISNOT_ADMIN" | "SERVER_SIDE_ERROR">("http://localhost:8000/administrator", {withCredentials: true}).then(res => {
+        axios.get<UserDetail[] | "ROLE_IS_ADMIN" | "ROLE_ISNOT_ADMIN" | "SERVER_SIDE_ERROR">(`${BACKEND_API_ENDPOINT}/administrator`, {withCredentials: true}).then(res => {
             if (res.data === "ROLE_ISNOT_ADMIN" || res.data === "SERVER_SIDE_ERROR") {
                 navigate("/login")
                 return
             }
         })
 
-        axios.get<UserDetail[] | "GET_USERLIST_ERROR">("http://localhost:8000/users").then(res => {
+        axios.get<UserDetail[] | "GET_USERLIST_ERROR">(`${BACKEND_API_ENDPOINT}/users`).then(res => {
             if (res.data === "GET_USERLIST_ERROR") {
                 alert("Get Userlist Error!")
             } else {
@@ -30,18 +33,22 @@ export const Users = () => {
             }
         })
 
-    }, [])
+    })
 
     const deleteUser = (name: string) => {
-        axios.post<"USER_DELETE_SUCCESS" | "DELETE_USER_ERROR">("http://localhost:8000/deleteUser", {userNameToDelete: name})
+        axios.post<"USER_DELETE_SUCCESS" | "DELETE_USER_ERROR">(`${BACKEND_API_ENDPOINT}/deleteUser`, {userNameToDelete: name})
         .then(res => {
             if (res.data === "DELETE_USER_ERROR") {
-                alert("Delete user error.")
-                window.location.reload()
+                setDisplaying('▶ ⚠️ User deletion error!')
+                setTimeout(function timer() {
+                    window.location.reload()
+                  }, 2000);  
                 return
             } else {
-                alert("User Deleted!")
-                window.location.reload()
+                setDisplaying('▶ ✅ User deleted!')
+                setTimeout(function timer() {
+                    window.location.reload()
+                  }, 2000);  
                 return
             }
 
@@ -55,6 +62,7 @@ export const Users = () => {
     return (
         <div className="container2">
             <h1 className="titles">Users</h1>
+            <h3 className="smallText">{displaying}</h3>
             <table className="container2">
                 <thead className="smallText2">
                     <tr>
@@ -75,13 +83,13 @@ export const Users = () => {
                         <td>{list.user_fullname}</td>
                         <td>{list.user_password}</td>
                         <td>{list.user_role}</td>
-                        <td><button className="button" onClick={() => deleteUser(list.user_name)}>Delete</button></td>
+                        <td><button className="button2" onClick={() => deleteUser(list.user_name)}>Delete</button></td>
                         </tr>
                     ))
                     }
                 </tbody>
             </table>
-            <button className="button" onClick={gobacktoadmin}>Go Back</button>
+            <button className="button" onClick={gobacktoadmin}>🡄 Go Back</button>
         </div>
     )
 }

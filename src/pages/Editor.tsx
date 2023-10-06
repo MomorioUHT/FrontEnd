@@ -6,15 +6,18 @@ import AceEditor from "react-ace";
 import Select from 'react-select';
 
 import "ace-builds/src-noconflict/mode-python";
-import "ace-builds/src-noconflict/theme-dracula";
+import "ace-builds/src-noconflict/theme-ambiance";
 import "ace-builds/src-noconflict/ext-language_tools";
 
 export const Editor = () => {
 
     const languages = [
         {label: "Python", value: "Python"},
-        {label: "C", value: "C"},
-        {label: "C++", value: "C++"},
+        {label: "C (Disabled)", value: "Disabled"},
+        {label: "C++ (Disabled)", value: "Disabled"},
+        {label: "C# (Disabled)", value: "Disabled"},
+        {label: "Java (Disabled)", value: "Disabled"},
+        {label: "Visual Basic (Disabled)", value: "Disabled"},
     ]
 
     const [username, setUsername] = useState('')
@@ -26,11 +29,14 @@ export const Editor = () => {
     const [language, setLanguage] = useState(null)
 
     const [outputDisplay, setOutputDisplay] = useState('')
+    const [displaying, setDisplaying] = useState('▶ Waiting for a command...')
 
     const navigate = useNavigate();
 
+    const BACKEND_API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT
+    
     useEffect(() => {
-        axios.get<UserDetail[] | "NOT_LOGGEDIN" | "SERVER_SIDE_ERROR">("http://localhost:8000/checkLoginSession", {withCredentials: true}).then(res => {
+        axios.get<UserDetail[] | "NOT_LOGGEDIN" | "SERVER_SIDE_ERROR">(`${BACKEND_API_ENDPOINT}/checkLoginSession`, {withCredentials: true}).then(res => {
             if (res.data === "NOT_LOGGEDIN" || res.data === "SERVER_SIDE_ERROR") {
                 navigate("/Login")
                 return
@@ -39,37 +45,32 @@ export const Editor = () => {
             setFullname(res.data[0].user_fullname)
             setRole(res.data[0].user_role)
         })
-    }, [])
-
-    const logout = () => {
-        axios.get<"LOGOUT_ERROR" | "LOGGED_OUT">("http://localhost:8000/logout", {withCredentials: true}).then(res => {
-            if (res.data === "LOGGED_OUT") {
-                navigate('/Login')
-            } else {
-                alert('Logout error go check console')
-            }
-        })
-    }
+    })
 
     const compileCode = () => {
-        if (language) {
+        if (language !== 'Disabled') {
             setOutputDisplay('Running...')
-            axios.post<any>("http://localhost:8000/compile", {
+            axios.post<any>(`${BACKEND_API_ENDPOINT}/compile`, {
                 code: code,
                 input: input,
                 language: language
             }).then(res => {
-                if (Number(res.data)) {
-                    setOutputDisplay(JSON.stringify(res.data)) 
-                } else if (String(res.data)) {
-                    setOutputDisplay(res.data)               
+                if (res.data === 'QUEUE_NOT_AVALIBLE') {
+                    setDisplaying(`▶ ⚠️ 🕑 The Program is Busy, please wait a moment and queue again.`)
                 } else {
-                    setOutputDisplay("Undefined result \n - Code has an infinite loop \n - Code does not return or print any output")
+                    if (Number(res.data)) {
+                        setOutputDisplay(JSON.stringify(res.data)) 
+                    } else if (String(res.data)) {
+                        setOutputDisplay(res.data)               
+                    } else {
+                        setOutputDisplay("Undefined result \n - Code has an infinite loop \n - Code does not return or print any output")
+                    }
                 }
             })
+        } else if (language === 'Disabled') {
+            setDisplaying('▶ ⛔ Sorry This language has been disabled by the owner!')
         } else {
-            alert("Please select a language to Compile!")
-            setOutputDisplay('Invalid Language!')
+            setDisplaying('▶ ⚠️ Please select a language for this problem!')
         }
     }
 
@@ -92,19 +93,18 @@ export const Editor = () => {
         <div>       
             <div className='navbar'>
                 <div className="rightnav">
-                    <button className="button" onClick={logout}>Log out</button>
-                </div>
-                <div className="rightnav">
-                    <h3 className="navdisplaytop" onClick={gotoadmin}>{username} ({fullname})</h3>
+                    <h3 className="navdisplaytopclickable" onClick={gotoadmin}>{username} ({fullname})</h3>
                 </div>
                 <div className="leftnav">
-                    <button className="button" onClick={gotohome}>Home</button>
+                    <button className="button2" onClick={gotohome}>🡄 Home</button>
                 </div>
             </div>
             <div className="container3">
+                <a className="bigtitles">Editor</a><br /><br />
+                <h3 className="smallText">{displaying}</h3>
                 <AceEditor
                     mode="python"
-                    theme="dracula"
+                    theme="ambiance"
                     onChange={setCode}
                     name="codeMarker"
                     editorProps={{ $blockScrolling: true }}
@@ -114,7 +114,7 @@ export const Editor = () => {
                 <h3 className="smallText">Input (leave blank for no input)</h3>
                 <AceEditor
                     mode="text"
-                    theme="dracula"
+                    theme="ambiance"
                     onChange={setInput}
                     name="codeMarker"
                     editorProps={{ $blockScrolling: true }}
@@ -128,11 +128,11 @@ export const Editor = () => {
                 options={languages} 
                 onChange={updateLanguage}
                 />
-                <button className="button" onClick={compileCode}>Run</button><br />
+                <button className="button2" onClick={compileCode}>Run</button><br />
                 <h3 className="smallText">Console</h3>
                 <AceEditor
                     mode="text"
-                    theme="dracula"
+                    theme="ambiance"
                     name="codeMarker"
                     fontSize={16}    
                     width="900px" 

@@ -11,8 +11,10 @@ export const Home = () => {
     const [fullname, setFullname] = useState('')
     const [role, setRole] = useState('')
 
+    const BACKEND_API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT
+    
     useEffect(() => {
-        axios.get<UserDetail[] | "NOT_LOGGEDIN" | "SERVER_SIDE_ERROR">("http://localhost:8000/checkLoginSession", {withCredentials: true}).then(res => {
+        axios.get<UserDetail[] | "NOT_LOGGEDIN" | "SERVER_SIDE_ERROR">(`${BACKEND_API_ENDPOINT}/checkLoginSession`, {withCredentials: true}).then(res => {
             if (res.data === "NOT_LOGGEDIN" || res.data === "SERVER_SIDE_ERROR") {
                 navigate("/Login")
                 return
@@ -21,10 +23,10 @@ export const Home = () => {
             setFullname(res.data[0].user_fullname)
             setRole(res.data[0].user_role)
         })
-    }, [])
+    })
 
     const logout = () => {
-        axios.get<"LOGOUT_ERROR" | "LOGGED_OUT">("http://localhost:8000/logout", {withCredentials: true}).then(res => {
+        axios.get<"LOGOUT_ERROR" | "LOGGED_OUT">(`${BACKEND_API_ENDPOINT}/logout`, {withCredentials: true}).then(res => {
             if (res.data === "LOGGED_OUT") {
                 navigate('/Login')
             } else {
@@ -40,9 +42,7 @@ export const Home = () => {
     const gotoadmin = () => {
         if (role === 'Admin') {
             navigate("/Admindashboard")
-        } else {
-            alert("You do not have permission to access that page!")
-        }
+        } 
     }
 
     const gotopythonpage = () => {
@@ -53,18 +53,26 @@ export const Home = () => {
         <div>       
             <div className='navbar'>
                 <div className="rightnav">
-                    <button className="button" onClick={logout}>Log out</button>
+                    <button className="button" onClick={logout}>🔓 Log out</button>
                 </div>
                 <div className="rightnav">
-                    <h3 className="navdisplaytop" onClick={gotoadmin}>{username} ({fullname})</h3>
+                    <h3 className="navdisplaytopclickable" onClick={gotoadmin}>👤 {username} ({fullname})</h3>
                 </div>
                 <div className="leftnav">
-                    <button className="button" onClick={gotoeditor}>Editor</button>
+                    <h3 className="homepagesabsolute">🔬Labatory01-Test</h3>
+                </div>
+                <div className="leftnav">
+                    <h3 className="smallhomepageabsolute">Made by MomorioUHT</h3>
                 </div>
             </div>
-            <div className='container'>
-                <a className="titles">Avalible Class</a><br /><br />
-                <button className="button2" onClick={gotopythonpage}>Python Programs</button>
+
+            <div className='homepagelefttitle'>
+                <a className="titles">Problems</a><br /><br />
+                <button className="button2" onClick={gotopythonpage}>Python</button>
+            </div>
+            <div className='homepagerighttitle'>
+                <a className="titles">Tools</a><br /><br />
+                <button className="button2" onClick={gotoeditor}>🖥️ Editor</button>
             </div>
         </div>
     )
