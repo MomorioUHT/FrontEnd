@@ -5,8 +5,8 @@ jobs:
     runs-on: ubuntu-latest
     name: A job to say hello
     steps:
-      - name: Get the output time
-        run: echo "work"
       - name: Trying to run docker
         run: docker ps
+      - name: Watch file
+        run: ls
 
