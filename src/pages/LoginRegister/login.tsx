@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { UserDetail } from "../hook";
 import axios from 'axios';
+import { Button } from 'react-bootstrap'
+import 'bootstrap/dist/css/bootstrap.min.css'
 
 export const Login = () => {
     const [username, setLoginUsername] = useState('')
@@ -45,12 +47,12 @@ export const Login = () => {
 
     return (
         <div>
-            <div className="container2">
-                <h1 className="bigtitles">Login</h1>
-                <h3 className="smallText">{displaying}</h3>
-                <input className="inputBox" placeholder="Username" value={username} onChange={(e) => setLoginUsername(e.target.value)}/><br />
-                <input className="inputBox" type="password" placeholder="Password" value={password} onChange={(e) => setLoginPassword(e.target.value)}/><br /><br />
-                <button className="button" onClick={Check}>Login</button><br /><br />
+            <div>
+                <h1>Login</h1>
+                <h3>{displaying}</h3>
+                <input className="form-control" aria-describedby="inputGroup-sizing-lg" placeholder="Username" value={username} onChange={(e) => setLoginUsername(e.target.value)}/><br />
+                <input className="form-control" aria-describedby="inputGroup-sizing-lg" type="password" placeholder="Password" value={password} onChange={(e) => setLoginPassword(e.target.value)}/><br /><br />
+                <button type="button" className="btn btn-primary" onClick={Check}>Login</button><br /><br />
                 <a className="smallText">Does not have an Account?</a><br />
                 <Link className="smallText2" to="/Register">Register</Link>
             </div>
