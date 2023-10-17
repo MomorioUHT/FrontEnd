@@ -14,6 +14,8 @@ export interface ResultDetail {
 export interface ProblemDetail {
     ProblemID: string;
     ProblemName: string;
+    ProblemLevel: string;
+    ProblemRunAmt: string;
     ProblemDescription: string;
     ProblemExamples: string;
     CaseAmt: string;

@@ -1,7 +1,24 @@
 import axios from "axios";
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom";
-import { UserDetail } from "./hook"
+import { UserDetail,ProblemDetail } from "./hook"
+import {
+    Layout, 
+    Menu,
+    Button,
+    Table
+ } from 'antd';
+
+ import {      
+    MenuFoldOutlined,
+    MenuUnfoldOutlined,
+    HomeOutlined,
+    UserOutlined,
+    CodeOutlined,
+    LogoutOutlined,
+ } from '@ant-design/icons';
+
+const { Header, Sider, Content, Footer } = Layout;
 
 export const Home = () => {
 
@@ -11,7 +28,44 @@ export const Home = () => {
     const [fullname, setFullname] = useState('')
     const [role, setRole] = useState('')
 
+    const [collapsed, setCollapsed] = useState(false);
+    const [problemList, setProblemList] = useState<ProblemDetail[]>([])
+
     const BACKEND_API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT
+
+    const gotoproblem = (problemID: String) => {
+        alert(`go to number ${problemID}`)
+    }
+
+    const columns = [
+        {
+            title: 'Problem Name',
+            dataIndex: 'ProblemName',
+            key: 'ProblemName',
+            onCell: (record: any) => {
+                return {
+                    onClick: () => {
+                        gotoproblem(record.ProblemID);
+                    },
+                };
+            },
+        },
+        {
+            title: 'Level',
+            dataIndex: 'ProblemLevel',
+            key: 'ProblemLevel',
+        },
+        {
+            title: 'Pass Rate',
+            dataIndex: 'PassRate',
+            key: 'PassRate',
+        },
+        {
+            title: 'Problem ID',
+            dataIndex: 'ProblemID',
+            key: 'ProblemID',
+        },
+    ];
     
     useEffect(() => {
         axios.get<UserDetail[] | "NOT_LOGGEDIN" | "SERVER_SIDE_ERROR">(`${BACKEND_API_ENDPOINT}/checkLoginSession`, {withCredentials: true}).then(res => {
@@ -22,6 +76,13 @@ export const Home = () => {
             setUsername(res.data[0].user_name)
             setFullname(res.data[0].user_fullname)
             setRole(res.data[0].user_role)
+        })
+        axios.get<ProblemDetail[] | "GET_PYTHON_PROBLEM_ERROR">(`${BACKEND_API_ENDPOINT}/PythonProblems`).then(res => {
+            if (res.data === "GET_PYTHON_PROBLEM_ERROR") {
+                alert("Get Python Problem List Error!")
+            } else {
+                setProblemList(res.data)
+            }
         })
     }, [])
 
@@ -36,7 +97,7 @@ export const Home = () => {
     }
 
     const gotoeditor = () => {
-        navigate("/Editor")
+        navigate("/Playground")
     }
 
     const gotoadmin = () => {
@@ -44,36 +105,79 @@ export const Home = () => {
             navigate("/Admindashboard")
         } 
     }
-
-    const gotopythonpage = () => {
-        navigate("/Python")
-    }
     
     return (
-        <div>       
-            <div className='navbar'>
-                <div className="rightnav">
-                    <button className="button" onClick={logout}>🔓 Log out</button>
-                </div>
-                <div className="rightnav">
-                    <h3 className="navdisplaytopclickable" onClick={gotoadmin}>👤 {username} ({fullname})</h3>
-                </div>
-                <div className="leftnav">
-                    <h3 className="homepagesabsolute">🔬Labatory01-Test</h3>
-                </div>
-                <div className="leftnav">
-                    <h3 className="smallhomepageabsolute">Made by MomorioUHT</h3>
-                </div>
-            </div>
+        <div>     
+            <Layout>
+                <Sider trigger={null} collapsible collapsed={collapsed} style={{height: 'auto'}}>
+                    <Menu
+                        theme="dark"
+                        mode="inline"
+                        defaultSelectedKeys={['1']}
+                        items={[
+                            {
+                                key: '1',
+                                icon: <HomeOutlined />,
+                                label: 'Home',
+                            },
+                            {
+                                key: '2',
+                                icon: <UserOutlined />,
+                                label: 'Your Profile',
+                            },
+                            {
+                                key: '3',
+                                icon: <CodeOutlined />,
+                                label: 'Playground',
+                                onClick: gotoeditor
+                            },
+                        ]}
+                    />
+                </Sider>
+            
+            <Layout>
+                <Header style={{padding: 0,}}>
+                    <Button
+                        type="text"
+                        icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+                        onClick={() => setCollapsed(!collapsed)}
+                        style={{
+                        fontSize: '16px',
+                        width: 64,
+                        height: 64,
+                        color: 'white'
+                        }}
+                    />
+                    <div style={{float: "right", fontSize:'16px'}}>
+                        <a style={{color: 'white'}} onClick={gotoadmin}>{username} ({fullname})</a>
+                        <Button
+                            type="text"
+                            icon={<LogoutOutlined />}
+                            onClick={logout}
+                            style={{
+                                width: 64,
+                                height: 64,
+                                color: 'white'
+                            }}
+                        />
+                    </div>
+                </Header>
 
-            <div className='homepagelefttitle'>
-                <a className="titles">Problems</a><br /><br />
-                <button className="button2" onClick={gotopythonpage}>Python</button>
-            </div>
-            <div className='homepagerighttitle'>
-                <a className="titles">Tools</a><br /><br />
-                <button className="button2" onClick={gotoeditor}>🖥️ Editor</button>
-            </div>
+                <Content
+                    style={{
+                        margin: '24px 16px',
+                        padding: 24,
+                        minHeight: '853px',
+                    }}
+                >
+                    <Table dataSource={problemList} columns={columns} style={{cursor: "pointer"}}/>
+                    
+                    <Footer style={{textAlign: 'center',}}>
+                        Lab ©2023 Created with love by MomorioUHT UwU
+                    </Footer>
+                </Content>
+            </Layout>
+            </Layout>
         </div>
     )
 }

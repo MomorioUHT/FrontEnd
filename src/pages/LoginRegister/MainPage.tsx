@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
 import { UserDetail } from "../hook";
 import axios from 'axios';
 import {  Button, 
@@ -101,7 +100,7 @@ export const MainPage = () => {
               })
         } else if (regpassword !== regconfirmpassword) {
             notification.error({
-                message: 'Cannt Register',
+                message: 'Cannot Register',
                 description: 'Password Does not Match',
                 placement: 'topLeft'
               })
@@ -140,36 +139,31 @@ export const MainPage = () => {
 
     return (
         <div className="MainPageBody">
-            <div className="RefreshOnLoad">
                 <Header
                     style={{
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 1,
-                    width: '100%',
                     display: 'flex',
                     alignItems: 'center',
                     }}
                 >
-                <div  />
+                    <div className="demo-logo" />
                     <Menu
-                        theme="dark"
-                        mode="horizontal"
-                        defaultSelectedKeys={['1']}
-                        items={[
-                            {
+                    theme="dark"
+                    mode="horizontal"
+                    defaultSelectedKeys={['1']}
+                    items={[
+                        {
                             key: '1',
                             icon: <LoginOutlined />,
                             label: 'Login',
                             onClick: () => ToggleDisplay("Login")
-                            },
-                            {
+                        },
+                        {
                             key: '2',
                             icon: <PlusSquareOutlined />,
                             label: 'Register',
                             onClick: () => ToggleDisplay("Register")
-                            },
-                        ]}
+                        },
+                    ]}
                     />
                 </Header>
                 <div id="Login" className="RefreshOnLoad" style={{display: "block",margin: 30}}>
@@ -250,6 +244,5 @@ export const MainPage = () => {
                     </Space.Compact>
                 </div>
             </div>
-        </div>
     )
 }

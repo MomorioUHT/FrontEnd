@@ -21,6 +21,13 @@ export const CreateProblem = () => {
         {label: "Visual Basic (Disabled)", value: "Disabled"},
     ]
 
+    const levels = [
+        {label: "Easy", value: "Easy"},
+        {label: "Medium", value: "Medium"},
+        {label: "Hard", value: "Hard"},
+        {label: "Evil", value: "Evil"},
+    ]
+
     const BACKEND_API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT
 
     const [username, setUsername] = useState('')
@@ -32,6 +39,7 @@ export const CreateProblem = () => {
     const [correctProgram, setCorrectProgram] = useState('')
     const [language, setLanguage] = useState(null)
     const [caseAmt, setCaseAmt] = useState(0)
+    const [problemLevel, setProblemLevel] = useState(null)
 
     const [resultList, setResultList] = useState<ResultDetail[]>([])
     const [displaying, setDisplaying] = useState('▶ Waiting for a command...')
@@ -98,7 +106,15 @@ export const CreateProblem = () => {
     }, [])
 
     const TestRun = () => {
-        if (language !== 'Disabled') {
+        if (!language) {
+            setDisplaying('▶ ⚠️ Please Select your language to test')
+        } else if (caseAmt === 0) {
+            setDisplaying('▶ ⚠️ Please define case amount to test')
+        } else if (correctProgram === '') {
+            setDisplaying('▶ ⚠️ There is no program to test')
+        } else if (language === 'Disabled') {
+            setDisplaying('▶ ⚠️ Sorry but this language is Disabled by the owner')
+        } else {
             setDisplaying('▶ 🕑 Testing your code... 📋')
             window.scrollTo({top:0 ,behavior:'smooth'}); 
             axios.post<any>(`${BACKEND_API_ENDPOINT}/TestRun`, {
@@ -159,15 +175,25 @@ export const CreateProblem = () => {
                       }, 200);
                 }                  
             })
-        } else if (language === 'Disabled') {
-            setDisplaying('▶ ⛔ Sorry This language has been disabled by the owner!')
-        } else {
-            setDisplaying('▶ ⚠️ Please select a language for this problem!')
-        }
+        } 
     }
 
     const StoreToMySQL = () => {
-        if (language !== 'Disabled') {
+        if (!language) {
+            setDisplaying('▶ ⚠️ Please Select your language for this problem')
+        } else if (!problemLevel) {
+            setDisplaying('▶ ⚠️ Please select problem Level')
+        } else if (caseAmt === 0) {
+            setDisplaying('▶ ⚠️ Please define testcase amount')
+        } else if (correctProgram === '') {
+            setDisplaying('▶ ⚠️ There is no any program to store')
+        } else if (problemDescription === '') {
+            setDisplaying('▶ ⚠️ Please Write the Problem Description')
+        } else if (problemExamples === '') {
+            setDisplaying('▶ ⚠️ You need at least 1 Example for the problem')
+        } else if (language === 'Disabled') {
+            setDisplaying('▶ ⚠️ Sorry but this language is Disabled by the owner!')
+        } else {
             setDisplaying('▶ 🕑 Saving the problem... 💾')
             window.scrollTo({top:0 ,behavior:'smooth'}); 
             axios.post<'ADDING_PROBLEM_ERROR' | 'PROBLEM_SAVED!' | 'QUEUE_NOT_AVALIBLE'>(`${BACKEND_API_ENDPOINT}/SaveToDatabase`, {
@@ -178,6 +204,7 @@ export const CreateProblem = () => {
                 problemExamples: problemExamples,
                 caseAmt: Number(caseAmt),
                 language: language,
+                problemLevel: problemLevel,
                 case1: case1,
                 case2: case2,
                 case3: case3,
@@ -228,14 +255,16 @@ export const CreateProblem = () => {
                     setDisplaying('▶ ✅ Problem Saved!') 
                 }
             })
-        } else {
-            setDisplaying('▶ ⚠️ Please select a language for this problem!')
         }
     }
 
     const updateLanguage = (e: any) => {
         setLanguage(e.value);
       };
+
+    const updateLevel = (e: any) => {
+        setProblemLevel(e.value)
+    }
 
     const gobacktoadmin = () => {
         navigate('/AdminDashboard')
@@ -278,6 +307,13 @@ export const CreateProblem = () => {
                     className="Selector" 
                     options={languages} 
                     onChange={updateLanguage}
+                    /><br />
+
+                    <h3 className="smallText">⚙️ Problem Level</h3>
+                    <Select 
+                    className="Selector" 
+                    options={levels} 
+                    onChange={updateLevel}
                     /><br />
 
                     <h3 className="smallText">⌨️ Description</h3>

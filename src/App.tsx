@@ -4,7 +4,7 @@ import { MainPage } from './pages/LoginRegister/MainPage';
 import { Users } from './pages/Admins/users';
 import { Home } from './pages/homepage';
 import { AdminDashboard } from './pages/Admins/Admindashboard';
-import { Editor } from './pages/Editor';
+import { Playground } from './pages/Playground';
 import { CreateProblem } from './pages/Admins/CreateProblem';
 import { Problem1 } from './pages/PythonPage';
 import { PythonProblems } from './pages/Admins/ManagePython';
@@ -20,7 +20,7 @@ function App() {
         <Route path="AdminDashboard" element={<AdminDashboard />} />
         <Route path="AdminDashboard/Users" element={<Users />} />
         <Route path="AdminDashboard/PythonProblems" element={<PythonProblems />} />
-        <Route path="Editor" element={<Editor />} />
+        <Route path="Playground" element={<Playground />} />
         <Route path="AdminDashboard/CreateProblem" element={<CreateProblem />} />
         <Route path="Python" element={<Problem1 />} />
       </Routes>
