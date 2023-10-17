@@ -82,7 +82,7 @@ export const CreateProblem = () => {
     useEffect(() => {
         axios.get<UserDetail[] | "NOT_LOGGEDIN" | "SERVER_SIDE_ERROR">(`${BACKEND_API_ENDPOINT}/checkLoginSession`, {withCredentials: true}).then(res => {
             if (res.data === "NOT_LOGGEDIN" || res.data === "SERVER_SIDE_ERROR") {
-                navigate("/Login")
+                navigate("/MainPage")
                 return
             }
             setUsername(res.data[0].user_name)
@@ -95,7 +95,7 @@ export const CreateProblem = () => {
             }
         })
 
-    })
+    }, [])
 
     const TestRun = () => {
         if (language !== 'Disabled') {

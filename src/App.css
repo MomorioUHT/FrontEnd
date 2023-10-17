@@ -1,11 +1,26 @@
 @import url('https://fonts.googleapis.com/css?family=Josefin+Sans');
 
 HTML, BODY {
-  margin-top: 50px;
   min-width: 1000px;
   padding: 0;
   box-sizing: border-box;
   background-color: rgb(255, 255, 255)
+}
+
+.MainPageBody {
+  height: 965px;
+  background-image: url('https://images.hdqwalls.com/wallpapers/bthumb/dark-material-design-bx.jpg');
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.RefreshOnLoad {
+  animation: fadeIn 0.5s;
+}
+
+.LoginAndRegisterTitle {
+  color: white;
+  margin-left: 20px
 }
 
 @keyframes fadeIn {  

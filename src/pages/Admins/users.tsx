@@ -33,7 +33,7 @@ export const Users = () => {
             }
         })
 
-    })
+    }, [])
 
     const deleteUser = (name: string) => {
         axios.post<"USER_DELETE_SUCCESS" | "DELETE_USER_ERROR">(`${BACKEND_API_ENDPOINT}/deleteUser`, {userNameToDelete: name})

@@ -13,14 +13,14 @@ export const PythonProblems = () => {
     useEffect(() => {
         axios.get<UserDetail[] | "NOT_LOGGEDIN" | "SERVER_SIDE_ERROR">(`${BACKEND_API_ENDPOINT}/checkLoginSession`, {withCredentials: true}).then(res => {
             if (res.data === "NOT_LOGGEDIN" || res.data === "SERVER_SIDE_ERROR") {
-                navigate("/Login")
+                navigate("/MainPage")
                 return
             }
         })
 
         axios.get<UserDetail[] | "ROLE_IS_ADMIN" | "ROLE_ISNOT_ADMIN" | "SERVER_SIDE_ERROR">(`${BACKEND_API_ENDPOINT}/administrator`, {withCredentials: true}).then(res => {
             if (res.data === "ROLE_ISNOT_ADMIN" || res.data === "SERVER_SIDE_ERROR") {
-                navigate("/login")
+                navigate("/MainPage")
                 return
             }
         })
@@ -33,7 +33,7 @@ export const PythonProblems = () => {
             }
         })
 
-    })
+    }, [])
 
     const deleteProblem = (ID: string) => {
         axios.post<"DELETE_PROBLEM_ERROR" | "PROBLEM_DELETE_SUCCESS">(`${BACKEND_API_ENDPOINT}/deletePythonProblems`, {ProblemID: ID})

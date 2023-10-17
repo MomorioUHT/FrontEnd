@@ -1,7 +1,6 @@
 import './App.css';
 import { Routes, Route, Navigate } from "react-router-dom";
-import { Login } from './pages/LoginRegister/login';
-import { Register } from './pages/LoginRegister/register';
+import { MainPage } from './pages/LoginRegister/MainPage';
 import { Users } from './pages/Admins/users';
 import { Home } from './pages/homepage';
 import { AdminDashboard } from './pages/Admins/Admindashboard';
@@ -15,10 +14,9 @@ function App() {
   return (
     <div>
       <Routes>
-      <Route path="/" element={<Navigate to="/Login" replace={true} />} />
+      <Route path="/" element={<Navigate to="/MainPage" replace={true} />} />
         <Route path="Home" element={<Home />} />
-        <Route path="Register" element={<Register />} />
-        <Route path="Login" element={<Login />} />
+        <Route path="MainPage" element={<MainPage />} />
         <Route path="AdminDashboard" element={<AdminDashboard />} />
         <Route path="AdminDashboard/Users" element={<Users />} />
         <Route path="AdminDashboard/PythonProblems" element={<PythonProblems />} />
