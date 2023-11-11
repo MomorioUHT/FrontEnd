@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom";
 import { UserDetail } from "../hook";
+import { Helmet } from 'react-helmet';
 import axios from 'axios';
 import {  Button, 
           Input, 
@@ -39,6 +40,9 @@ export const MainPage = () => {
                 navigate("/Home")
             }
         })
+        setTimeout(function timer() {
+            console.clear()
+        }, 150);  
     }, [])
     
     const ToggleDisplay = (Arg: string) => {
@@ -72,6 +76,7 @@ export const MainPage = () => {
               .then(function (response) {
                 console.log(response);
                 if (response.data === "SEVER_SIDE_ERROR" || response.data === "WRONG") {
+                    console.clear()
                     notification.error({
                         message: 'Login failed',
                         description: 'Username or Password is Incorrect',
@@ -139,6 +144,11 @@ export const MainPage = () => {
 
     return (
         <div className="MainPageBody">
+            <Helmet>
+                <title>Lab</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            </Helmet>
+
                 <Header
                     style={{
                     display: 'flex',

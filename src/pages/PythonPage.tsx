@@ -1,25 +1,118 @@
 import axios from "axios";
-import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom";
-import { UserDetail,ProblemDetail } from "./hook"
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { UserDetail,ProblemDetail } from "./hook";
+import { Helmet } from 'react-helmet';
 import AceEditor from "react-ace";
+import { AlignType } from 'rc-table/lib/interface'
 
 import "ace-builds/src-noconflict/mode-python";
-import "ace-builds/src-noconflict/theme-ambiance";
+import "ace-builds/src-noconflict/theme-dreamweaver";
 import "ace-builds/src-noconflict/ext-language_tools";
+
+import {  Button, 
+    notification, 
+    Layout, 
+    Modal,
+    Table,
+    Result
+ } from 'antd';
+
+import {  
+    LeftCircleOutlined,
+    LogoutOutlined,
+    BarChartOutlined,
+    DoubleRightOutlined,
+    BulbOutlined,
+    CaretRightOutlined,
+ } from '@ant-design/icons';
+import { Content } from "antd/es/layout/layout";
+
+const { Header,Footer } = Layout;
 
 export const Problem1 = () => {
 
+    const {id} = useParams();
+
     const [username, setUsername] = useState('')
     const [fullname, setFullname] = useState('')
+    const [role, setRole] = useState('')
 
     const [code, setCode] = useState('')
 
-    const [resultDisplay, setDisplaying] = useState('▶ Click Submit to grading your program')
-    const [problemList, setProblemList] = useState<ProblemDetail[]>([])
+    const [resultDisplay, setDisplaying] = useState('Click Submit to grading your program')
+    const [resultSymbol, setResultSymbol] = useState('')
+    const [resultSubDisplay, setSubDisplaying] = useState('')
+
+    const [currentProblem, setCurrentProblem] = useState<ProblemDetail[]>([])
 
     const BACKEND_API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT
     const navigate = useNavigate();
+
+    const [failedOpen, setFailedOpen] = useState(false);
+    const [passedOpen, setPassedOpen] = useState(false);
+
+    const [loadings, setLoadings] = useState(false);
+ 
+    const enterLoading = (value: boolean) => {
+        setLoadings(value);
+    }
+
+    const OpenFailed = () => {
+        setFailedOpen(true);
+    };
+
+    const FailedClose = () => {
+        setFailedOpen(false);
+    };
+
+    const OpenPassed= () => {
+        setPassedOpen(true);
+    };
+
+    const PassedClose = () => {
+        setPassedOpen(false);
+    };
+
+    const columns1 = [
+        {
+            title: 'Input',
+            dataIndex: 'Input1',
+            key: 'input',
+        },
+        {
+            title: 'Output',
+            dataIndex: 'Output1',
+            key: 'output',
+        }
+    ];
+
+    const columns2 = [
+        {
+            title: 'Input',
+            dataIndex: 'Input2',
+            key: 'input',
+        },
+        {
+            title: 'Output',
+            dataIndex: 'Output2',
+            key: 'output',
+        }
+    ];
+
+    const columns3 = [
+        {
+            title: 'Input',
+            dataIndex: 'Input3',
+            key: 'input',
+        },
+        {
+            title: 'Output',
+            dataIndex: 'Output3',
+            key: 'output',
+        }
+    ];
+
 
     useEffect(() => {
         axios.get<UserDetail[] | "NOT_LOGGEDIN" | "SERVER_SIDE_ERROR">(`${BACKEND_API_ENDPOINT}/checkLoginSession`, {withCredentials: true}).then(res => {
@@ -29,99 +122,239 @@ export const Problem1 = () => {
             }
             setUsername(res.data[0].user_name)
             setFullname(res.data[0].user_fullname)
+            setRole(res.data[0].user_role)
         })
-        axios.get<ProblemDetail[] | "GET_PYTHON_PROBLEM_ERROR">(`${BACKEND_API_ENDPOINT}/PythonProblems`).then(res => {
-            if (res.data === "GET_PYTHON_PROBLEM_ERROR") {
-                alert("Get Python Problem List Error!")
+
+        axios.get<ProblemDetail[]>(`${BACKEND_API_ENDPOINT}/currentPythonProblem/${id}`).then(res => {
+            if (res.data.length === 0) {
+                notification.error({
+                    message: 'Error',
+                    description: 'That Problem Does not exist...',
+                    placement: 'topLeft'
+                  })
+                  setTimeout(function timer() {
+                    navigate("/Home")
+                }, 150);  
             } else {
-                setProblemList(res.data)
+                setCurrentProblem(res.data)
             }
         })
+
+        setTimeout(function timer() {
+            console.clear()
+        }, 150);  
     }, [])
 
+    const SubmitCode = (ProblemID: String) => {
+        if (code.replaceAll(" ", "") === '') {
+            notification.error({
+                message: 'Error',
+                description: 'The code is empty!',
+                placement: 'topLeft'
+              })            
+        } else {
+            enterLoading(true)
+            setDisplaying(`Grading...`)
+            setResultSymbol('')
+            axios.post(`${BACKEND_API_ENDPOINT}/Grading`, {
+                code: code,
+                problemID: ProblemID,
+                language: 'Python'
+            }).then(res => {
+                if (res.data === 'QUEUE_NOT_AVALIBLE') {
+                    notification.info({
+                        message: 'The Server is quite busy',
+                        description: 'Try to queue again...',
+                        placement: 'topLeft'
+                      })
+                } else if (res.data === 'ERROR WHILE SELECT PROBLEMS!') {
+                    notification.error({
+                        message: 'Error',
+                        description: 'That Problem Does not exist...',
+                        placement: 'topLeft'
+                      })
+                } else{
+                    if (res.data.includes('-') || res.data.includes('C') || res.data.includes('S')) {
+                        enterLoading(false)
+                        OpenFailed()
+                        setDisplaying(`[${res.data}]`)
+                        setResultSymbol(`FAILED`)
+                        setSubDisplaying(`${String(res.data).replaceAll('-', '').replaceAll('C', '').length} cases out of ${String(res.data).length} passed`)
+                    } else {
+                        enterLoading(false)
+                        setDisplaying(`[${res.data}]`)
+                        setResultSymbol(`PASSED`)
+                        setSubDisplaying(`All ${res.data.length} cases passed`)
+                        OpenPassed()
+                    }
+                }
+            })
+        }
+    }
+
+    const gotoadmin = () => {
+        if (role === 'Admin') {
+            navigate("/Admindashboard/CreateProblem")
+        } 
+    }
     const gotohome = () => {
         navigate("/Home")
     }
 
-    const SubmitCode = (ProblemID: String) => {
-        setDisplaying('▶ 🕑 Grading...')
-        window.scrollTo({top:0 ,behavior:'smooth'});  
-        axios.post(`${BACKEND_API_ENDPOINT}/Grading`, {
-            code: code,
-            problemID: ProblemID,
-            language: 'Python'
-        }).then(res => {
-            if (res.data === 'QUEUE_NOT_AVALIBLE') {
-                setDisplaying(`▶ ⚠️ 🕑 The Program is Busy, please wait a moment and queue again.`)
-            } else if (res.data === 'ERROR WHILE SELECT PROBLEMS!') {
-                setDisplaying(`❌ Problem ID Does not Exist!`)
-            } else{
-                if (res.data.includes('-') || res.data.includes('C')) {
-                    setDisplaying(`▶ Result: ❌ FAILED [${res.data}] 📋 ${String(res.data).replaceAll('-', '').replaceAll('C', '').length} PASSED / ${String(res.data).replaceAll('P', '').length} FAILED`)
-                } else {
-                    setDisplaying(`▶ Result: ✅ PASSED [${res.data}] 📋 ${res.data.length} / ${res.data.length} PASSED`)
-                }
+    const logout = () => {
+        axios.get<"LOGOUT_ERROR" | "LOGGED_OUT">(`${BACKEND_API_ENDPOINT}/logout`, {withCredentials: true}).then(res => {
+            if (res.data === "LOGGED_OUT") {
+                window.location.reload()
+            } else {
+                alert('Logout error go check console')
             }
         })
     }
 
-    const ToggleProblem = (ProblemID: String) => {
-        setDisplaying('▶ Click Submit to grading your program')
-        const box = document.getElementById(`${ProblemID}`);
-        if (box != null) {
-            if (box.style.display === "none") {
-                box.style.display = "block";
-            } else {
-                box.style.display = "none";
-            }
-        }        
-    }
-
     return (
-        <div>       
-            <div className='navbar'>
-                <div className="rightnav">
-                    <h3 className="navdisplaytop">👤 {username} ({fullname})</h3>
+        <div> 
+            <Helmet>
+                <title>Python Problems</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            </Helmet> 
+
+            <Modal open={failedOpen} onOk={FailedClose} onCancel={FailedClose} >
+                <Result 
+                    status="error"
+                    title="Wrong Answer"
+                    subTitle={resultDisplay}
+                >
+                </Result>
+                <p><BarChartOutlined /> {resultSubDisplay}</p>
+            </Modal>
+            <Modal open={passedOpen} onOk={PassedClose} onCancel={PassedClose} >
+                <Result 
+                    status="success"
+                    title="Passed"
+                    subTitle={resultDisplay}
+                >
+                </Result>
+                <p><BarChartOutlined /> {resultSubDisplay}</p>
+            </Modal>
+
+            <Layout>
+            <Header style={{padding: 0}}>
+                <Button
+                    type="text"
+                    icon={<LeftCircleOutlined />}
+                    onClick={gotohome}
+                    style={{
+                    fontSize: '16px',
+                    width: 64,
+                    height: 64,
+                    color: 'white',
+                    }}
+                    >Go Back</Button>
+                <div style={{float: "right", fontSize:'16px'}}>
+                        <a style={{color: 'white'}} onClick={gotoadmin}>{username} ({fullname})</a>
+                        <Button
+                            type="text"
+                            icon={<LogoutOutlined />}
+                            onClick={logout}
+                            style={{
+                                width: 64,
+                                height: 64,
+                                color: 'white'
+                            }}
+                        />
                 </div>
-                <div className="leftnav">
-                    <button className="button" onClick={gotohome}>🡄 Go Back</button>
-                </div>
-                <div className="leftnav">
-                    <h3 className="navdisplaytop">🌐 Python Problems</h3>
-                </div>
-            </div>
-            <div className="sidenav">
-                <br />
-                {
-                    problemList.map((list) => (
-                        <a className='smallText3' onClick={() => ToggleProblem(list.ProblemID)}>✦ {list.ProblemName}</a>
-                    ))
-                }
-            </div>
-            
-            {
-                problemList.map((list, index) => (
-                    <div className="containerlefthide" id={list.ProblemID}>
-                        <a className='titles'>✦ {list.ProblemName}</a><br /><br />
-                        <a className='smallText'>{resultDisplay}</a><br /><br />
-                        <a href="about:blank" className='smallText'>-------------------------------------------------------------------</a><br></br>
-                        <a className='smallText'>{list.ProblemDescription}</a><br></br><br></br>
-                        <a className='smallText2'>Example</a><br></br>
-                        <a className='smallText'>{list.ProblemExamples}</a><br></br>
-                        <a className='smallText'>-------------------------------------------------------------------</a><br></br><br></br>
+            </Header>   
+
+            <Content style={{
+                margin: '10px 24px',
+                minHeight: '853px',    
+            }}>
+                <div className="container">
+                    <div className="left">
+                    {
+                        currentProblem.map((list) => (
+                            <div style={{marginTop: '20px'}}>
+                                <a style={{
+                                    fontSize:'40px',
+                                    color: 'black'
+                                }}>
+                                    <BulbOutlined /> {currentProblem[0].ProblemName}
+                                </a><br/>
+
+                                <a style={{
+                                    fontSize:'15px',
+                                    color: 'black'
+                                }}>
+                                    Level {list.ProblemLevel}
+                                </a><br /><br />
+
+                                <a style={{
+                                    fontSize:'20px',
+                                    color: 'black',
+                                    fontWeight: 'bold'
+                                }}>
+                                Description
+                                </a><br />
+
+                                <p style={{
+                                    fontSize:'15px',
+                                    color: 'black',
+                                    whiteSpace: 'pre'
+                                }}>
+                                {list.ProblemDescription}
+                                </p>
+
+                                <a style={{
+                                    fontSize:'20px',
+                                    color: 'black',
+                                    fontWeight: 'bold'
+                                }}>
+                                Example
+                                </a><br />
+
+                                <p style={{
+                                    fontSize:'15px',
+                                    color: 'black'
+                                }}>
+
+                                <Table dataSource={currentProblem} columns={columns1} bordered style={{cursor: "pointer",whiteSpace: "pre",verticalAlign: "top"}}/>
+                                <Table dataSource={currentProblem} columns={columns2} bordered style={{cursor: "pointer",whiteSpace: "pre",verticalAlign: "top"}}/>
+                                <Table dataSource={currentProblem} columns={columns3} bordered style={{cursor: "pointer",whiteSpace: "pre",verticalAlign: "top"}}/>
+
+                                </p>
+                            </div>
+                        ))                
+                    }      
+                    </div>
+                    <div className="right">
+                        <p style={{
+                                fontSize:'15px',
+                                color: 'black'
+                        }}>
+                        Latest Submission <CaretRightOutlined /> {resultSymbol} {resultDisplay}</p>
+
+                        <Button type="primary" loading={loadings} onClick={() => SubmitCode(`${id}`)}>
+                            Submit <DoubleRightOutlined />
+                        </Button><br/><br/>
+
                         <AceEditor
                             mode="python"
-                            theme="ambiance"
+                            theme="dreamweaver"
                             onChange={setCode}
-                            name="codeMarker"
+                            name="Code"
                             editorProps={{ $blockScrolling: true }}
                             fontSize={16}    
-                            width="900px"    
-                        /><br />   
-                        <button className="button2" onClick={() => SubmitCode(list.ProblemID)}>Submit</button> 
+                            width="900px" 
+                            height="800px"   
+                        />
                     </div>
-                ))                
-            }
+                </div>    
+            </Content>
+
+            <Footer style={{textAlign: 'center',}}>
+                Lab ©2023 Created with love by MomorioUHT UwU
+            </Footer>
+        </Layout>  
         </div>
     )
 }

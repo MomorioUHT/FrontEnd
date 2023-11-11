@@ -2,6 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom";
 import { UserDetail,ProblemDetail } from "./hook"
+import { Helmet } from 'react-helmet';
 import {
     Layout, 
     Menu,
@@ -34,7 +35,7 @@ export const Home = () => {
     const BACKEND_API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT
 
     const gotoproblem = (problemID: String) => {
-        alert(`go to number ${problemID}`)
+        navigate(`/Python/${problemID}`)
     }
 
     const columns = [
@@ -56,15 +57,15 @@ export const Home = () => {
             key: 'ProblemLevel',
         },
         {
-            title: 'Pass Rate',
-            dataIndex: 'PassRate',
-            key: 'PassRate',
+            title: 'Language',
+            dataIndex: 'ProblemLanguage',
+            key: 'ProblemLanguage',
         },
         {
             title: 'Problem ID',
             dataIndex: 'ProblemID',
             key: 'ProblemID',
-        },
+        }
     ];
     
     useEffect(() => {
@@ -84,6 +85,9 @@ export const Home = () => {
                 setProblemList(res.data)
             }
         })
+        setTimeout(function timer() {
+            console.clear()
+        }, 150);  
     }, [])
 
     const logout = () => {
@@ -102,28 +106,33 @@ export const Home = () => {
 
     const gotoadmin = () => {
         if (role === 'Admin') {
-            navigate("/Admindashboard")
+            navigate("/Admindashboard/CreateProblem")
         } 
     }
     
     return (
-        <div>     
+        <div>   
+            <Helmet>
+                <title>Home</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            </Helmet> 
+
             <Layout>
                 <Sider trigger={null} collapsible collapsed={collapsed} style={{height: 'auto'}}>
                     <Menu
                         theme="dark"
                         mode="inline"
-                        defaultSelectedKeys={['1']}
+                        defaultSelectedKeys={['2']}
                         items={[
                             {
                                 key: '1',
-                                icon: <HomeOutlined />,
-                                label: 'Home',
+                                icon: <UserOutlined />,
+                                label: 'Your Profile',
                             },
                             {
                                 key: '2',
-                                icon: <UserOutlined />,
-                                label: 'Your Profile',
+                                icon: <HomeOutlined />,
+                                label: 'Home',
                             },
                             {
                                 key: '3',

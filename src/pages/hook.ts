@@ -12,12 +12,18 @@ export interface ResultDetail {
 }
 
 export interface ProblemDetail {
+    ProblemLanguage: string;
     ProblemID: string;
     ProblemName: string;
     ProblemLevel: string;
     ProblemRunAmt: string;
     ProblemDescription: string;
-    ProblemExamples: string;
+    Input1: String;
+    Input2: String;
+    Input3: String;
+    Output1: String;
+    Output2: String;
+    Output3: String;
     CaseAmt: string;
     Cases: string;
 }

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom";
 import { UserDetail } from "./hook"
 import AceEditor from "react-ace";
+import { Helmet } from 'react-helmet';
 
 import "ace-builds/src-noconflict/mode-python";
 import "ace-builds/src-noconflict/theme-dreamweaver";
@@ -56,6 +57,9 @@ export const Playground = () => {
             setFullname(res.data[0].user_fullname)
             setRole(res.data[0].user_role)
         })
+        setTimeout(function timer() {
+            console.clear()
+        }, 150);  
     }, [])
 
     const compileCode = () => {
@@ -119,7 +123,7 @@ export const Playground = () => {
 
     const gotoadmin = () => {
         if (role === 'Admin') {
-            navigate("/Admindashboard")
+            navigate("/Admindashboard/CreateProblem")
         } 
     }
 
@@ -135,6 +139,11 @@ export const Playground = () => {
 
     return (
         <div> 
+            <Helmet>
+                <title>Playground</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            </Helmet> 
+
             <Layout>
             <Sider trigger={null} collapsible collapsed={collapsed} style={{height: 'auto'}}>
                 <Menu
@@ -144,14 +153,14 @@ export const Playground = () => {
                     items={[
                         {
                             key: '1',
-                            icon: <HomeOutlined />,
-                            label: 'Home',
-                            onClick: gotohome
+                            icon: <UserOutlined />,
+                            label: 'Your Profile',
                         },
                         {
                             key: '2',
-                            icon: <UserOutlined />,
-                            label: 'Your Profile',
+                            icon: <HomeOutlined />,
+                            label: 'Home',
+                            onClick: gotohome
                         },
                         {
                             key: '3',

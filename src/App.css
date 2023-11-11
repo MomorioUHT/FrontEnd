@@ -3,7 +3,6 @@
 HTML, BODY {
   min-width: 1000px;
   padding: 0;
-  box-sizing: border-box;
   background-color: rgb(255, 255, 255)
 }
 
@@ -21,6 +20,26 @@ HTML, BODY {
 .LoginAndRegisterTitle {
   color: white;
   margin-left: 20px
+}
+
+.container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 5px;
+}
+
+.inner-1 {
+  border-right: 1px solid black;
+}
+
+.left,
+.right {
+  height: 800px;
+  overflow-y: scroll;
+}
+
+.left {
+  border-right: 1px solid black;
 }
 
 @keyframes fadeIn {  
