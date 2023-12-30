@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom";
-import { UserDetail } from "./hook"
+import { UserDetail } from "../Redux/hook"
 import AceEditor from "react-ace";
 import { Helmet } from 'react-helmet';
 
@@ -21,10 +21,10 @@ import {
     MenuFoldOutlined,
     MenuUnfoldOutlined,
     HomeOutlined,
-    UserOutlined,
     CodeOutlined,
     LogoutOutlined,
-    RightCircleOutlined
+    RightCircleOutlined,
+    WechatOutlined
  } from '@ant-design/icons';
 
 const { Header, Sider, Content, Footer } = Layout;
@@ -127,6 +127,10 @@ export const Playground = () => {
         } 
     }
 
+    const gotoglobalchat = () => {
+        navigate("/GlobalChat")
+    }
+
     const logout = () => {
         axios.get<"LOGOUT_ERROR" | "LOGGED_OUT">(`${BACKEND_API_ENDPOINT}/logout`, {withCredentials: true}).then(res => {
             if (res.data === "LOGGED_OUT") {
@@ -153,8 +157,9 @@ export const Playground = () => {
                     items={[
                         {
                             key: '1',
-                            icon: <UserOutlined />,
-                            label: 'Your Profile',
+                            icon: <WechatOutlined />,
+                            label: 'Global Chat',
+                            onClick: gotoglobalchat
                         },
                         {
                             key: '2',
@@ -185,7 +190,7 @@ export const Playground = () => {
                         }}
                     />
                     <div style={{float: "right", fontSize:'16px'}}>
-                        <a style={{color: 'white'}} onClick={gotoadmin}>{username} ({fullname})</a>
+                        <span style={{color: 'white'}} onClick={gotoadmin}>{username} ({fullname})</span>
                         <Button
                             type="text"
                             icon={<LogoutOutlined />}

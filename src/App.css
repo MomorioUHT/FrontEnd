@@ -36,6 +36,7 @@ HTML, BODY {
 .right {
   height: 800px;
   overflow-y: scroll;
+  margin-left: 20px;
 }
 
 .left {

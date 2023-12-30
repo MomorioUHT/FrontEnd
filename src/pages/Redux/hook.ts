@@ -12,7 +12,6 @@ export interface ResultDetail {
 }
 
 export interface ProblemDetail {
-    ProblemLanguage: string;
     ProblemID: string;
     ProblemName: string;
     ProblemLevel: string;

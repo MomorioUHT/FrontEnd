@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom";
-import { UserDetail,ProblemDetail } from "./hook"
+import { UserDetail,ProblemDetail } from "../Redux/hook"
 import { Helmet } from 'react-helmet';
 import {
     Layout, 
@@ -14,9 +14,9 @@ import {
     MenuFoldOutlined,
     MenuUnfoldOutlined,
     HomeOutlined,
-    UserOutlined,
     CodeOutlined,
     LogoutOutlined,
+    WechatOutlined
  } from '@ant-design/icons';
 
 const { Header, Sider, Content, Footer } = Layout;
@@ -35,7 +35,7 @@ export const Home = () => {
     const BACKEND_API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT
 
     const gotoproblem = (problemID: String) => {
-        navigate(`/Python/${problemID}`)
+        navigate(`/task/${problemID}`)
     }
 
     const columns = [
@@ -57,11 +57,6 @@ export const Home = () => {
             key: 'ProblemLevel',
         },
         {
-            title: 'Language',
-            dataIndex: 'ProblemLanguage',
-            key: 'ProblemLanguage',
-        },
-        {
             title: 'Problem ID',
             dataIndex: 'ProblemID',
             key: 'ProblemID',
@@ -78,9 +73,9 @@ export const Home = () => {
             setFullname(res.data[0].user_fullname)
             setRole(res.data[0].user_role)
         })
-        axios.get<ProblemDetail[] | "GET_PYTHON_PROBLEM_ERROR">(`${BACKEND_API_ENDPOINT}/PythonProblems`).then(res => {
-            if (res.data === "GET_PYTHON_PROBLEM_ERROR") {
-                alert("Get Python Problem List Error!")
+        axios.get<ProblemDetail[] | "GET_PROBLEM_ERROR">(`${BACKEND_API_ENDPOINT}/Problems`).then(res => {
+            if (res.data === "GET_PROBLEM_ERROR") {
+                alert("Get Problem List Error!")
             } else {
                 setProblemList(res.data)
             }
@@ -109,6 +104,9 @@ export const Home = () => {
             navigate("/Admindashboard/CreateProblem")
         } 
     }
+    const gotoglobalchat = () => {
+        navigate("/GlobalChat")
+    }
     
     return (
         <div>   
@@ -126,8 +124,9 @@ export const Home = () => {
                         items={[
                             {
                                 key: '1',
-                                icon: <UserOutlined />,
-                                label: 'Your Profile',
+                                icon: <WechatOutlined />,
+                                label: 'Global Chat',
+                                onClick: gotoglobalchat
                             },
                             {
                                 key: '2',
@@ -158,7 +157,7 @@ export const Home = () => {
                         }}
                     />
                     <div style={{float: "right", fontSize:'16px'}}>
-                        <a style={{color: 'white'}} onClick={gotoadmin}>{username} ({fullname})</a>
+                        <span style={{color: 'white'}} onClick={gotoadmin}>{username} ({fullname})</span>
                         <Button
                             type="text"
                             icon={<LogoutOutlined />}

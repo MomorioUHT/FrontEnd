@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom";
-import { UserDetail} from "../hook"
+import { UserDetail} from "../Redux/hook"
 import { Helmet } from 'react-helmet';
 
 import {
@@ -13,7 +13,6 @@ import {
     Result,
     notification
  } from 'antd';
-
  import {      
     MenuFoldOutlined,
     MenuUnfoldOutlined,
@@ -24,14 +23,20 @@ import {
     LeftCircleOutlined
  } from '@ant-design/icons';
 
+import { useUsersQuery,useDeleteUserMutation } from "../Redux/Api";
+
 const { Header, Sider, Content, Footer } = Layout;
 
 export const Users = () => {
     const navigate = useNavigate();
+
+    const { data, error, isLoading, isFetching, isSuccess } = useUsersQuery();
+    const { refetch } = useUsersQuery();
+
+    const [ userDeletion ] = useDeleteUserMutation();
+
     const [username, setUsername] = useState('')
     const [fullname, setFullname] = useState('')
-
-    const [userList, setUserList] = useState<UserDetail[]>([])
 
     const [collapsed, setCollapsed] = useState(false);
     const [confirmOpen, setConfirmopen] = useState(false);
@@ -57,14 +62,6 @@ export const Users = () => {
             setFullname(res.data[0].user_fullname)
         })
 
-        axios.get<UserDetail[] | "GET_USERLIST_ERROR">(`${BACKEND_API_ENDPOINT}/users`).then(res => {
-            if (res.data === "GET_USERLIST_ERROR") {
-                alert("Get Userlist Error!")
-            } else {
-                setUserList(res.data)
-            }
-        })
-
         setTimeout(function timer() {
             console.clear()
         }, 150); 
@@ -83,11 +80,6 @@ export const Users = () => {
             key: 'user_fullname',
         },
         {
-            title: 'Password',
-            dataIndex: 'user_password',
-            key: 'user_password',
-        },
-        {
             title: 'Role',
             dataIndex: 'user_role',
             key: 'user_role',
@@ -95,7 +87,7 @@ export const Users = () => {
         {
             title: 'Action',
             render: () => (
-                <a>Delete</a>
+                <span>Delete</span>
               ),
             onCell: (record: any) => {
                 return {
@@ -111,43 +103,22 @@ export const Users = () => {
         setConfirmopen(true)
         setCurrUserToDelete(user)
     }
-    const OkClick= () => {
-        setConfirmopen(false)
-        deleteUser(currUserName)
-    };
-
+    
     const CancelClick = () => {
         setConfirmopen(false)
     };
 
-    const deleteUser = (name: string) => {
-        axios.post<"USER_DELETE_SUCCESS" | "DELETE_USER_ERROR">(`${BACKEND_API_ENDPOINT}/deleteUser`, {userNameToDelete: name})
-        .then(res => {
-            if (res.data === "DELETE_USER_ERROR") {
-                notification.error({
-                    message: 'User Deletion Error',
-                    description: `There was a problem deleting ${name} try again later...`,
-                    placement: 'topLeft'
-                  })
-                setTimeout(function timer() {
-                    window.location.reload()
-                  }, 2000);  
-                return
-            } else {
-                notification.success({
-                    message: 'Delete Successful!',
-                    description: `User  ${name} has been removed from the database.`,
-                    placement: 'topLeft'
-                  })
-                setTimeout(function timer() {
-                    window.location.reload()
-                  }, 2000);  
-                return
-            }
-
-        })
-    }
-
+    const OkClick = async() => {
+        await setConfirmopen(false)
+        await userDeletion(currUserName)
+        await refetch()
+        notification.success({
+            message: 'Delete Successful!',
+            description: `User ${currUserName} has been removed from the database.`,
+            placement: 'topLeft'
+          })
+    };
+    
     const gotohome = () => {
         navigate('/Home')
     }
@@ -157,7 +128,7 @@ export const Users = () => {
     }
 
     const gotopythonproblem = () => {
-        navigate("/AdminDashboard/PythonProblems")
+        navigate("/AdminDashboard/ManageProblems")
     }
 
     const logout = () => {
@@ -239,7 +210,7 @@ export const Users = () => {
                         }}
                     />
                     <div style={{float: "right", fontSize:'16px'}}>
-                        <a style={{color: 'white'}}>{username} ({fullname})</a>
+                        <span style={{color: 'white'}}>{username} ({fullname})</span>
                         <Button
                             type="text"
                             icon={<LogoutOutlined />}
@@ -260,15 +231,18 @@ export const Users = () => {
                         minHeight: '853px',
                     }}
                 >
-                    <a style={{
+                    <span style={{
                         fontSize:'20px',
                         marginLeft: '10px',
                         color: 'black'
                     }}>
                         Manage Users <br /><br />
-                        <Table dataSource={userList} columns={columns} style={{cursor: "pointer"}}/>
+                        {isFetching && <span>Fetching...</span>}
+                        {isLoading && <span>Loading...</span>}
+                        {error && <span>Fetch users failed!</span>}
+                        {isSuccess && <Table dataSource={data} columns={columns} style={{cursor: "pointer"}}/>}
 
-                    </a><br/>               
+                    </span><br/>               
                     
                     <Footer style={{textAlign: 'center',}}>
                         Lab ©2023 Created with love by MomorioUHT UwU

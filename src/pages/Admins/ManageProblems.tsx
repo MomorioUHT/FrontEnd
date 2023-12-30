@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom";
-import { UserDetail, ProblemDetail } from "../hook"
+import { UserDetail, ProblemDetail } from "../Redux/hook"
 import { Helmet } from 'react-helmet';
 
 import {
@@ -24,18 +24,24 @@ import {
     LeftCircleOutlined
  } from '@ant-design/icons';
 
+import { useProblemsQuery,useDeleteProblemMutation } from "../Redux/Api";
+
 const { Header, Sider, Content, Footer } = Layout;
 
-export const PythonProblems = () => {
+export const Problems = () => {
     const navigate = useNavigate();
-    const [problemList, setProblemList] = useState<ProblemDetail[]>([])
+
+    const { data, error, isLoading, isFetching, isSuccess } = useProblemsQuery();
+    const { refetch } = useProblemsQuery();
+
+    const [ problemDeletion ] = useDeleteProblemMutation();
 
     const [username, setUsername] = useState('')
     const [fullname, setFullname] = useState('')
 
     const [collapsed, setCollapsed] = useState(false);
     const [confirmOpen, setConfirmopen] = useState(false);
-    const [currProblem, setCurrProblemToDelete] = useState('')
+    const [currProblemIDToDelete, setCurrProblemIDToDelete] = useState('')
 
 
     const BACKEND_API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT
@@ -52,14 +58,6 @@ export const PythonProblems = () => {
             if (res.data === "ROLE_ISNOT_ADMIN" || res.data === "SERVER_SIDE_ERROR") {
                 navigate("/Home")
                 return
-            }
-        })
-
-        axios.get<ProblemDetail[] | "GET_PYTHON_PROBLEM_ERROR">(`${BACKEND_API_ENDPOINT}/PythonProblems`).then(res => {
-            if (res.data === "GET_PYTHON_PROBLEM_ERROR") {
-                alert("Get Python Problem List Error!")
-            } else {
-                setProblemList(res.data)
             }
         })
 
@@ -90,11 +88,6 @@ export const PythonProblems = () => {
             key: 'ProblemName',
         },
         {
-            title: 'Language',
-            dataIndex: 'ProblemLanguage',
-            key: 'ProblemLanguage',
-        },
-        {
             title: 'Testcase Amount',
             dataIndex: 'CaseAmt',
             key: 'CaseAmt',
@@ -102,7 +95,7 @@ export const PythonProblems = () => {
         {
             title: 'Action',
             render: () => (
-                <a>Delete</a>
+                <span>Delete</span>
               ),
             onCell: (record: any) => {
                 return {
@@ -116,11 +109,18 @@ export const PythonProblems = () => {
 
     const confirmDelete = (ProblemID: string) => {
         setConfirmopen(true)
-        setCurrProblemToDelete(ProblemID)
+        setCurrProblemIDToDelete(ProblemID)
     }
-    const OkClick= () => {
-        setConfirmopen(false)
-        deleteProblem(currProblem)
+    
+    const OkClick = async() => {
+        await setConfirmopen(false)
+        await problemDeletion(currProblemIDToDelete)
+        await refetch()
+        notification.success({
+            message: 'Delete Successful!',
+            description: `User ${currProblemIDToDelete} has been removed from the database.`,
+            placement: 'topLeft'
+          })
     };
 
     const CancelClick = () => {
@@ -146,34 +146,6 @@ export const PythonProblems = () => {
             } else {
                 alert('Logout error go check console')
             }
-        })
-    }
-
-    const deleteProblem = (ID: string) => {
-        axios.post<"DELETE_PROBLEM_ERROR" | "PROBLEM_DELETE_SUCCESS">(`${BACKEND_API_ENDPOINT}/deletePythonProblems`, {ProblemID: ID})
-        .then(res => {
-            if (res.data === "DELETE_PROBLEM_ERROR") {
-                notification.error({
-                    message: 'Problem Deletion Error',
-                    description: `There was a problem deleting ${ID} try again later...`,
-                    placement: 'topLeft'
-                  })
-                setTimeout(function timer() {
-                    window.location.reload()
-                  }, 2000); 
-                return
-            } else {
-                notification.success({
-                    message: 'Delete Successful!',
-                    description: `Problem ${ID} has been removed from the database.`,
-                    placement: 'topLeft'
-                  })
-                setTimeout(function timer() {
-                    window.location.reload()
-                  }, 2000); 
-                return
-            }
-
         })
     }
 
@@ -245,7 +217,7 @@ export const PythonProblems = () => {
                         }}
                     />
                     <div style={{float: "right", fontSize:'16px'}}>
-                        <a style={{color: 'white'}}>{username} ({fullname})</a>
+                        <span style={{color: 'white'}}>{username} ({fullname})</span>
                         <Button
                             type="text"
                             icon={<LogoutOutlined />}
@@ -266,15 +238,18 @@ export const PythonProblems = () => {
                         minHeight: '853px',
                     }}
                 >
-                    <a style={{
+                    <span style={{
                         fontSize:'20px',
                         marginLeft: '10px',
                         color: 'black'
                     }}>
                         Manage Python Problems <br /><br />
-                        <Table dataSource={problemList} columns={columns} style={{cursor: "pointer"}}/>
+                        {isFetching && <span>Fetching...</span>}
+                        {isLoading && <span>Loading...</span>}
+                        {error && <span>Fetch users failed!</span>}
+                        {isSuccess && <Table dataSource={data} columns={columns} style={{cursor: "pointer"}}/>}
 
-                    </a><br/>               
+                    </span><br/>               
                     
                     <Footer style={{textAlign: 'center',}}>
                         Lab ©2023 Created with love by MomorioUHT UwU

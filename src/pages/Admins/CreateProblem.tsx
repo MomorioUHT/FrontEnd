@@ -1,8 +1,8 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserDetail } from "../hook";
-import { ResultDetail } from "../hook";
+import { UserDetail } from "../Redux/hook";
+import { ResultDetail } from "../Redux/hook";
 import AceEditor from "react-ace";
 import { Helmet } from 'react-helmet';
 import "ace-builds/src-noconflict/mode-python";
@@ -252,6 +252,7 @@ export const CreateProblem = () => {
                 placement: 'topLeft'
               })  
             setDisplaying('Please Select your language to test!')
+            toggleLoadSaveProblem(false)
         } else if (!problemLevel) {
             notification.error({
                 message: 'Error',
@@ -259,6 +260,7 @@ export const CreateProblem = () => {
                 placement: 'topLeft'
               })  
             setDisplaying('Please Select the level for this problem!')
+            toggleLoadSaveProblem(false)
         } else if (caseAmt === 0) {
             notification.error({
                 message: 'Error',
@@ -266,6 +268,7 @@ export const CreateProblem = () => {
                 placement: 'topLeft'
               })  
             setDisplaying('Please Define TestCases Amount!')
+            toggleLoadSaveProblem(false)
         } else if (correctProgram === '') {
             notification.error({
                 message: 'Error',
@@ -273,6 +276,7 @@ export const CreateProblem = () => {
                 placement: 'topLeft'
               })  
             setDisplaying('There is no program to save!')
+            toggleLoadSaveProblem(false)
         } else if (problemDescription === '') {
             notification.error({
                 message: 'Error',
@@ -280,6 +284,7 @@ export const CreateProblem = () => {
                 placement: 'topLeft'
               })  
             setDisplaying('Please write a problem description')
+            toggleLoadSaveProblem(false)
         } else if (Input1 === '' && Output1 === '') {
             notification.error({
                 message: 'Error',
@@ -287,6 +292,7 @@ export const CreateProblem = () => {
                 placement: 'topLeft'
               })  
             setDisplaying('You need at least 1 problem examples!')
+            toggleLoadSaveProblem(false)
         } else if (language === 'Disabled') {
             notification.error({
                 message: 'Error',
@@ -294,6 +300,7 @@ export const CreateProblem = () => {
                 placement: 'topLeft'
               })  
             setDisplaying('This language is disabled UwU')
+            toggleLoadSaveProblem(false)
         } else {
             notification.info({
                 message: 'Saving',
@@ -315,7 +322,6 @@ export const CreateProblem = () => {
                 Output2: Output2,
                 Output3: Output3,
                 caseAmt: Number(caseAmt),
-                language: language,
                 problemLevel: problemLevel,
                 case1: case1,
                 case2: case2,
@@ -405,7 +411,7 @@ export const CreateProblem = () => {
     }
 
     const gotopythonproblem = () => {
-        navigate("/AdminDashboard/PythonProblems")
+        navigate("/AdminDashboard/ManageProblems")
     }
 
     const gotouserpage = () => {
@@ -493,7 +499,7 @@ export const CreateProblem = () => {
                         }}
                     />
                     <div style={{float: "right", fontSize:'16px'}}>
-                        <a style={{color: 'white'}}>{username} ({fullname})</a>
+                        <span style={{color: 'white'}}>{username} ({fullname})</span>
                         <Button
                             type="text"
                             icon={<LogoutOutlined />}
@@ -515,15 +521,15 @@ export const CreateProblem = () => {
                     }}>
                     <div className="container">
                         <div className="left">
-                            <a style={{
+                            <span style={{
                                     fontSize:'25px',
                                     color: 'black'
                             }}>
-                            Create Problem</a><br /><br />
-                            <a style={{
+                            Create Problem</span><br /><br />
+                            <span style={{
                                     fontSize:'14px',
                                     color: 'black'
-                            }}>{displaying}</a><br /><br />
+                            }}>{displaying}</span><br /><br />
 
                             <Input 
                                 name="input"
@@ -621,10 +627,10 @@ export const CreateProblem = () => {
                             height="300px"    
                         /><br /><br /><br />
 
-                        <a style={{
+                        <span style={{
                                     fontSize:'14px',
                                     color: 'black'
-                            }}>Example Section</a><br /><br />
+                            }}>Example Section</span><br /><br />
                         <AceEditor
                             mode="text"
                             theme="dreamweaver"
@@ -693,10 +699,10 @@ export const CreateProblem = () => {
                         /><br /><br /><br />
 
 
-                        <a style={{
+                        <span style={{
                                     fontSize:'14px',
                                     color: 'black'
-                        }}>Correct Program</a><br /><br />
+                        }}>Correct Program</span><br /><br />
                         <AceEditor
                             mode="python"
                             theme="dreamweaver"
@@ -711,11 +717,11 @@ export const CreateProblem = () => {
 
                         <div className="right">
                             <div style={{display: "block"}} id="TC1">
-                                <a style={{
+                                <span style={{
                                     fontSize:'25px',
                                     color: 'black',
                                 }}>
-                                <PlusSquareOutlined /> Testcase 1-10</a><br /><br />
+                                <PlusSquareOutlined /> Testcase 1-10</span><br /><br />
                                 <AceEditor
                                     mode="text"
                                     theme="dreamweaver"
@@ -829,11 +835,11 @@ export const CreateProblem = () => {
                             </div>
                             
                             <div style={{display: "none"}} id="TC2">
-                                <a style={{
+                                <span style={{
                                         fontSize:'25px',
                                         color: 'black',
                                 }}>
-                                <PlusSquareOutlined /> Testcase 11-20</a><br /><br />
+                                <PlusSquareOutlined /> Testcase 11-20</span><br /><br />
                                 <AceEditor
                                     mode="text"
                                     theme="dreamweaver"
@@ -947,11 +953,11 @@ export const CreateProblem = () => {
                             </div>
 
                             <div style={{display: "none"}} id="TC3">
-                            <a style={{
+                            <span style={{
                                     fontSize:'25px',
                                     color: 'black',
                                 }}>
-                                <PlusSquareOutlined /> Testcase 21-30</a><br /><br />
+                                <PlusSquareOutlined /> Testcase 21-30</span><br /><br />
                                 <AceEditor
                                     mode="text"
                                     theme="dreamweaver"
@@ -1065,11 +1071,11 @@ export const CreateProblem = () => {
                             </div>
                             
                             <div style={{display: "none"}} id="TC4">
-                                <a style={{
+                                <span style={{
                                     fontSize:'25px',
                                     color: 'black',
                                 }}>
-                                <PlusSquareOutlined /> Testcase 31-40</a><br /><br />
+                                <PlusSquareOutlined /> Testcase 31-40</span><br /><br />
                                 <AceEditor
                                     mode="text"
                                     theme="dreamweaver"

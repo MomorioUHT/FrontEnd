@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom";
-import { UserDetail } from "../hook";
+import { UserDetail } from "../Redux/hook";
 import { Helmet } from 'react-helmet';
 import axios from 'axios';
 import {  Button, 

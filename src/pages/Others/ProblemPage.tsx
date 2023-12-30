@@ -1,10 +1,9 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { UserDetail,ProblemDetail } from "./hook";
+import { UserDetail,ProblemDetail } from "../Redux/hook";
 import { Helmet } from 'react-helmet';
 import AceEditor from "react-ace";
-import { AlignType } from 'rc-table/lib/interface'
 
 import "ace-builds/src-noconflict/mode-python";
 import "ace-builds/src-noconflict/theme-dreamweaver";
@@ -15,7 +14,8 @@ import {  Button,
     Layout, 
     Modal,
     Table,
-    Result
+    Result,
+    Select
  } from 'antd';
 
 import {  
@@ -41,9 +41,8 @@ export const Problem1 = () => {
     const [code, setCode] = useState('')
 
     const [resultDisplay, setDisplaying] = useState('Click Submit to grading your program')
-    const [resultSymbol, setResultSymbol] = useState('')
     const [resultSubDisplay, setSubDisplaying] = useState('')
-
+    const [resultSymbol, setResultSymbol] = useState('')
     const [currentProblem, setCurrentProblem] = useState<ProblemDetail[]>([])
 
     const BACKEND_API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT
@@ -53,7 +52,8 @@ export const Problem1 = () => {
     const [passedOpen, setPassedOpen] = useState(false);
 
     const [loadings, setLoadings] = useState(false);
- 
+    const [language, setLanguage] = useState(null)
+
     const enterLoading = (value: boolean) => {
         setLoadings(value);
     }
@@ -78,12 +78,12 @@ export const Problem1 = () => {
         {
             title: 'Input',
             dataIndex: 'Input1',
-            key: 'input',
+            key: 'Input',
         },
         {
             title: 'Output',
             dataIndex: 'Output1',
-            key: 'output',
+            key: 'Output',
         }
     ];
 
@@ -125,7 +125,7 @@ export const Problem1 = () => {
             setRole(res.data[0].user_role)
         })
 
-        axios.get<ProblemDetail[]>(`${BACKEND_API_ENDPOINT}/currentPythonProblem/${id}`).then(res => {
+        axios.get<ProblemDetail[]>(`${BACKEND_API_ENDPOINT}/currentProblem/${id}`).then(res => {
             if (res.data.length === 0) {
                 notification.error({
                     message: 'Error',
@@ -146,7 +146,13 @@ export const Problem1 = () => {
     }, [])
 
     const SubmitCode = (ProblemID: String) => {
-        if (code.replaceAll(" ", "") === '') {
+        if (!language) {
+            notification.error({
+                message: 'Error',
+                description: 'Please Select language to Submit!',
+                placement: 'topLeft'
+              }) 
+        } else if (code.replaceAll(" ", "") === '') {
             notification.error({
                 message: 'Error',
                 description: 'The code is empty!',
@@ -154,12 +160,12 @@ export const Problem1 = () => {
               })            
         } else {
             enterLoading(true)
-            setDisplaying(`Grading...`)
+            setDisplaying(`Judging your code...`)
             setResultSymbol('')
             axios.post(`${BACKEND_API_ENDPOINT}/Grading`, {
                 code: code,
                 problemID: ProblemID,
-                language: 'Python'
+                submitLanguage: language
             }).then(res => {
                 if (res.data === 'QUEUE_NOT_AVALIBLE') {
                     notification.info({
@@ -178,12 +184,12 @@ export const Problem1 = () => {
                         enterLoading(false)
                         OpenFailed()
                         setDisplaying(`[${res.data}]`)
-                        setResultSymbol(`FAILED`)
+                        setResultSymbol('FAILED ✗')
                         setSubDisplaying(`${String(res.data).replaceAll('-', '').replaceAll('C', '').length} cases out of ${String(res.data).length} passed`)
                     } else {
                         enterLoading(false)
                         setDisplaying(`[${res.data}]`)
-                        setResultSymbol(`PASSED`)
+                        setResultSymbol('PASSED ✓')
                         setSubDisplaying(`All ${res.data.length} cases passed`)
                         OpenPassed()
                     }
@@ -214,7 +220,7 @@ export const Problem1 = () => {
     return (
         <div> 
             <Helmet>
-                <title>Python Problems</title>
+                <title>Problem</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
             </Helmet> 
 
@@ -251,7 +257,7 @@ export const Problem1 = () => {
                     }}
                     >Go Back</Button>
                 <div style={{float: "right", fontSize:'16px'}}>
-                        <a style={{color: 'white'}} onClick={gotoadmin}>{username} ({fullname})</a>
+                        <span style={{color: 'white'}} onClick={gotoadmin}>{username} ({fullname})</span>
                         <Button
                             type="text"
                             icon={<LogoutOutlined />}
@@ -274,27 +280,27 @@ export const Problem1 = () => {
                     {
                         currentProblem.map((list) => (
                             <div style={{marginTop: '20px'}}>
-                                <a style={{
+                                <span style={{
                                     fontSize:'40px',
                                     color: 'black'
                                 }}>
                                     <BulbOutlined /> {currentProblem[0].ProblemName}
-                                </a><br/>
+                                </span><br/>
 
-                                <a style={{
+                                <span style={{
                                     fontSize:'15px',
                                     color: 'black'
                                 }}>
                                     Level {list.ProblemLevel}
-                                </a><br /><br />
+                                </span><br /><br />
 
-                                <a style={{
+                                <span style={{
                                     fontSize:'20px',
                                     color: 'black',
                                     fontWeight: 'bold'
                                 }}>
                                 Description
-                                </a><br />
+                                </span><br />
 
                                 <p style={{
                                     fontSize:'15px',
@@ -304,19 +310,19 @@ export const Problem1 = () => {
                                 {list.ProblemDescription}
                                 </p>
 
-                                <a style={{
+                                <span style={{
                                     fontSize:'20px',
                                     color: 'black',
                                     fontWeight: 'bold'
                                 }}>
                                 Example
-                                </a><br />
+                                </span><br />
 
                                 <p style={{
                                     fontSize:'15px',
                                     color: 'black'
                                 }}>
-
+                                
                                 <Table dataSource={currentProblem} columns={columns1} bordered style={{cursor: "pointer",whiteSpace: "pre",verticalAlign: "top"}}/>
                                 <Table dataSource={currentProblem} columns={columns2} bordered style={{cursor: "pointer",whiteSpace: "pre",verticalAlign: "top"}}/>
                                 <Table dataSource={currentProblem} columns={columns3} bordered style={{cursor: "pointer",whiteSpace: "pre",verticalAlign: "top"}}/>
@@ -331,11 +337,48 @@ export const Problem1 = () => {
                                 fontSize:'15px',
                                 color: 'black'
                         }}>
-                        Latest Submission <CaretRightOutlined /> {resultSymbol} {resultDisplay}</p>
+                        Latest Submission Result <CaretRightOutlined /> {resultSymbol} {resultDisplay}</p>
 
                         <Button type="primary" loading={loadings} onClick={() => SubmitCode(`${id}`)}>
                             Submit <DoubleRightOutlined />
                         </Button><br/><br/>
+
+                        <Select 
+                                onChange={setLanguage}
+                                style={{ width: 160,}}
+                                placeholder="Submit language"
+                                options={[
+                                    {
+                                    value: 'Python',
+                                    label: 'Python',
+                                    },
+                                    {
+                                    value: 'C',
+                                    label: 'C',
+                                    disabled: true
+                                    },
+                                    {
+                                    value: 'C++',
+                                    label: 'C++',
+                                    disabled: true,
+                                    },
+                                    {
+                                    value: 'C#',
+                                    label: 'C#',
+                                    disabled: true,
+                                    },
+                                    {
+                                    value: 'Java',
+                                    label: 'Java',
+                                    disabled: true,
+                                    },
+                                    {
+                                    value: 'Visual Basic',
+                                    label: 'Visual Basic',
+                                    disabled: true,
+                                    },
+                                ]}
+                            /><br/><br/>
 
                         <AceEditor
                             mode="python"
