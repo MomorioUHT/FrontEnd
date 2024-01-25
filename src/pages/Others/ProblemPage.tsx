@@ -284,7 +284,7 @@ export const Problem1 = () => {
                                     fontSize:'40px',
                                     color: 'black'
                                 }}>
-                                    <BulbOutlined /> {currentProblem[0].ProblemName}
+                                    <BulbOutlined /> {list.ProblemName}
                                 </span><br/>
 
                                 <span style={{
@@ -323,9 +323,27 @@ export const Problem1 = () => {
                                     color: 'black'
                                 }}>
                                 
-                                <Table dataSource={currentProblem} columns={columns1} bordered style={{cursor: "pointer",whiteSpace: "pre",verticalAlign: "top"}}/>
+                                <table className="wholeTable">
+                                    <tr>
+                                        <th className="tableHead">Input</th>
+                                        <th className="tableHead">Output</th>
+                                    </tr>
+                                    <tr>
+                                        <td className="tableElements">{list.Input1}</td>
+                                        <td className="tableElements">{list.Output1}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="tableElements">{list.Input2}</td>
+                                        <td className="tableElements">{list.Output2}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="tableElements">{list.Input3}</td>
+                                        <td className="tableElements">{list.Output3}</td>
+                                    </tr>
+                                </table>
+                                {/* <Table dataSource={currentProblem} columns={columns1} bordered style={{cursor: "pointer",whiteSpace: "pre",verticalAlign: "top"}}/>
                                 <Table dataSource={currentProblem} columns={columns2} bordered style={{cursor: "pointer",whiteSpace: "pre",verticalAlign: "top"}}/>
-                                <Table dataSource={currentProblem} columns={columns3} bordered style={{cursor: "pointer",whiteSpace: "pre",verticalAlign: "top"}}/>
+                                <Table dataSource={currentProblem} columns={columns3} bordered style={{cursor: "pointer",whiteSpace: "pre",verticalAlign: "top"}}/> */}
 
                                 </p>
                             </div>

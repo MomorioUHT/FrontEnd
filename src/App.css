@@ -43,6 +43,30 @@ HTML, BODY {
   border-right: 1px solid black;
 }
 
+.tableElements {
+  border: 1px solid;
+  padding-right: 60px;
+  padding-bottom: 40px;
+  white-space: pre;
+  text-align: left;
+  vertical-align: top;
+}
+
+
+.tableHead {
+  border: 1px solid;
+  padding-left: 40px;
+  padding-right: 40px;
+  padding-top: 30px;
+  padding-bottom: 30px;
+}
+
+.wholeTable {
+  border: 1px solid;
+  padding: 10px;
+}
+
+
 @keyframes fadeIn {  
   from {  
       opacity:0;  
