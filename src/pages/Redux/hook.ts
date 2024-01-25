@@ -17,12 +17,12 @@ export interface ProblemDetail {
     ProblemLevel: string;
     ProblemRunAmt: string;
     ProblemDescription: string;
-    Input1: String;
-    Input2: String;
-    Input3: String;
-    Output1: String;
-    Output2: String;
-    Output3: String;
+    Input1: string;
+    Input2: string;
+    Input3: string;
+    Output1: string;
+    Output2: string;
+    Output3: string;
     CaseAmt: string;
     Cases: string;
 }
