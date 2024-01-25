@@ -341,10 +341,7 @@ export const Problem1 = () => {
                                         <td className="tableElements">{list.Output3}</td>
                                     </tr>
                                 </table>
-                                {/* <Table dataSource={currentProblem} columns={columns1} bordered style={{cursor: "pointer",whiteSpace: "pre",verticalAlign: "top"}}/>
-                                <Table dataSource={currentProblem} columns={columns2} bordered style={{cursor: "pointer",whiteSpace: "pre",verticalAlign: "top"}}/>
-                                <Table dataSource={currentProblem} columns={columns3} bordered style={{cursor: "pointer",whiteSpace: "pre",verticalAlign: "top"}}/> */}
-
+                                
                                 </p>
                             </div>
                         ))                
