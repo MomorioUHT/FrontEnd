@@ -12,16 +12,13 @@ import "ace-builds/src-noconflict/ext-language_tools";
 import {  Button, 
     notification, 
     Layout, 
-    Modal,
-    Table,
-    Result,
     Select
  } from 'antd';
 
 import {  
     LeftCircleOutlined,
     LogoutOutlined,
-    BarChartOutlined,
+    InfoCircleOutlined,
     DoubleRightOutlined,
     BulbOutlined,
     CaretRightOutlined,
@@ -48,71 +45,12 @@ export const Problem1 = () => {
     const BACKEND_API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT
     const navigate = useNavigate();
 
-    const [failedOpen, setFailedOpen] = useState(false);
-    const [passedOpen, setPassedOpen] = useState(false);
-
     const [loadings, setLoadings] = useState(false);
     const [language, setLanguage] = useState(null)
 
     const enterLoading = (value: boolean) => {
         setLoadings(value);
     }
-
-    const OpenFailed = () => {
-        setFailedOpen(true);
-    };
-
-    const FailedClose = () => {
-        setFailedOpen(false);
-    };
-
-    const OpenPassed= () => {
-        setPassedOpen(true);
-    };
-
-    const PassedClose = () => {
-        setPassedOpen(false);
-    };
-
-    const columns1 = [
-        {
-            title: 'Input',
-            dataIndex: 'Input1',
-            key: 'Input',
-        },
-        {
-            title: 'Output',
-            dataIndex: 'Output1',
-            key: 'Output',
-        }
-    ];
-
-    const columns2 = [
-        {
-            title: 'Input',
-            dataIndex: 'Input2',
-            key: 'input',
-        },
-        {
-            title: 'Output',
-            dataIndex: 'Output2',
-            key: 'output',
-        }
-    ];
-
-    const columns3 = [
-        {
-            title: 'Input',
-            dataIndex: 'Input3',
-            key: 'input',
-        },
-        {
-            title: 'Output',
-            dataIndex: 'Output3',
-            key: 'output',
-        }
-    ];
-
 
     useEffect(() => {
         axios.get<UserDetail[] | "NOT_LOGGEDIN" | "SERVER_SIDE_ERROR">(`${BACKEND_API_ENDPOINT}/checkLoginSession`, {withCredentials: true}).then(res => {
@@ -160,8 +98,9 @@ export const Problem1 = () => {
               })            
         } else {
             enterLoading(true)
-            setDisplaying(`Judging your code...`)
+            setDisplaying(`In queue...`)
             setResultSymbol('')
+            setSubDisplaying('')
             axios.post(`${BACKEND_API_ENDPOINT}/Grading`, {
                 code: code,
                 problemID: ProblemID,
@@ -182,7 +121,6 @@ export const Problem1 = () => {
                 } else{
                     if (res.data.includes('-') || res.data.includes('C') || res.data.includes('S')) {
                         enterLoading(false)
-                        OpenFailed()
                         setDisplaying(`[${res.data}]`)
                         setResultSymbol('FAILED ✗')
                         setSubDisplaying(`${String(res.data).replaceAll('-', '').replaceAll('C', '').length} cases out of ${String(res.data).length} passed`)
@@ -191,7 +129,6 @@ export const Problem1 = () => {
                         setDisplaying(`[${res.data}]`)
                         setResultSymbol('PASSED ✓')
                         setSubDisplaying(`All ${res.data.length} cases passed`)
-                        OpenPassed()
                     }
                 }
             })
@@ -223,25 +160,6 @@ export const Problem1 = () => {
                 <title>Problem</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
             </Helmet> 
-
-            <Modal open={failedOpen} onOk={FailedClose} onCancel={FailedClose} >
-                <Result 
-                    status="error"
-                    title="Wrong Answer"
-                    subTitle={resultDisplay}
-                >
-                </Result>
-                <p><BarChartOutlined /> {resultSubDisplay}</p>
-            </Modal>
-            <Modal open={passedOpen} onOk={PassedClose} onCancel={PassedClose} >
-                <Result 
-                    status="success"
-                    title="Passed"
-                    subTitle={resultDisplay}
-                >
-                </Result>
-                <p><BarChartOutlined /> {resultSubDisplay}</p>
-            </Modal>
 
             <Layout>
             <Header style={{padding: 0}}>
@@ -323,24 +241,110 @@ export const Problem1 = () => {
                                     color: 'black'
                                 }}>
                                 
-                                <table className="wholeTable">
-                                    <tr>
-                                        <th className="tableHead">Input</th>
-                                        <th className="tableHead">Output</th>
-                                    </tr>
-                                    <tr>
-                                        <td className="tableElements">{list.Input1}</td>
-                                        <td className="tableElements">{list.Output1}</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="tableElements">{list.Input2}</td>
-                                        <td className="tableElements">{list.Output2}</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="tableElements">{list.Input3}</td>
-                                        <td className="tableElements">{list.Output3}</td>
-                                    </tr>
-                                </table>
+                                <p style={{
+                                    fontSize:'15px',
+                                    color: 'black',
+                                    whiteSpace: 'pre'
+                                }}>
+                                Input1
+                                </p>
+                                <AceEditor
+                                    mode="text"
+                                    theme="dreamweaver"
+                                    value={list.Input1}
+                                    fontSize={16}    
+                                    width="900px" 
+                                    maxLines={Infinity}  
+                                    readOnly={true}
+                                    editorProps={{ $blockScrolling: true }}
+                                />
+                                <p style={{
+                                    fontSize:'15px',
+                                    color: 'black',
+                                    whiteSpace: 'pre'
+                                }}>
+                                Output1
+                                </p>
+                                <AceEditor
+                                    mode="text"
+                                    theme="dreamweaver"
+                                    value={list.Output1}
+                                    fontSize={16}    
+                                    width="900px" 
+                                    maxLines={Infinity}  
+                                    readOnly={true}
+                                    editorProps={{ $blockScrolling: true }}
+                                /><br/>
+
+                                <p style={{
+                                    fontSize:'15px',
+                                    color: 'black',
+                                    whiteSpace: 'pre'
+                                }}>
+                                Input2
+                                </p>
+                                <AceEditor
+                                    mode="text"
+                                    theme="dreamweaver"
+                                    value={list.Input2}
+                                    fontSize={16}    
+                                    width="900px" 
+                                    maxLines={Infinity}  
+                                    readOnly={true}
+                                    editorProps={{ $blockScrolling: true }}
+                                />
+                                <p style={{
+                                    fontSize:'15px',
+                                    color: 'black',
+                                    whiteSpace: 'pre'
+                                }}>
+                                Output2
+                                </p>
+                                <AceEditor
+                                    mode="text"
+                                    theme="dreamweaver"
+                                    value={list.Output2}
+                                    fontSize={16}    
+                                    width="900px" 
+                                    maxLines={Infinity}  
+                                    readOnly={true}
+                                    editorProps={{ $blockScrolling: true }}
+                                /><br/>
+
+                            <p style={{
+                                    fontSize:'15px',
+                                    color: 'black',
+                                    whiteSpace: 'pre'
+                                }}>
+                                Input3
+                                </p>
+                                <AceEditor
+                                    mode="text"
+                                    theme="dreamweaver"
+                                    value={list.Input3}
+                                    fontSize={16}    
+                                    width="900px" 
+                                    maxLines={Infinity}  
+                                    readOnly={true}
+                                    editorProps={{ $blockScrolling: true }}
+                                />
+                                <p style={{
+                                    fontSize:'15px',
+                                    color: 'black',
+                                    whiteSpace: 'pre'
+                                }}>
+                                Output3
+                                </p>
+                                <AceEditor
+                                    mode="text"
+                                    theme="dreamweaver"
+                                    value={list.Output3}
+                                    fontSize={16}    
+                                    width="900px" 
+                                    maxLines={Infinity}  
+                                    readOnly={true}
+                                    editorProps={{ $blockScrolling: true }}
+                                /><br/>
                                 
                                 </p>
                             </div>
@@ -352,7 +356,7 @@ export const Problem1 = () => {
                                 fontSize:'15px',
                                 color: 'black'
                         }}>
-                        Latest Submission Result <CaretRightOutlined /> {resultSymbol} {resultDisplay}</p>
+                        Latest Submission Result <CaretRightOutlined /> {resultSymbol} {resultDisplay} <InfoCircleOutlined /> {resultSubDisplay}</p>
 
                         <Button type="primary" loading={loadings} onClick={() => SubmitCode(`${id}`)}>
                             Submit <DoubleRightOutlined />
