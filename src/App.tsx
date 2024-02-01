@@ -7,7 +7,6 @@ import { Playground } from './pages/Others/Playground';
 import { CreateProblem } from './pages/Admins/CreateProblem';
 import { Problem1 } from './pages/Others/ProblemPage';
 import { Problems } from './pages/Admins/ManageProblems';
-import { GlobalChat } from './pages/Others/globalchat';
 
 
 function App() {
@@ -23,7 +22,6 @@ function App() {
         <Route path="Playground" element={<Playground />} />
         <Route path="AdminDashboard/CreateProblem" element={<CreateProblem />} />
         <Route path="task/:id" element={<Problem1 />} />
-        <Route path="GlobalChat" element={<GlobalChat />} />
       </Routes>
     </div>
   );

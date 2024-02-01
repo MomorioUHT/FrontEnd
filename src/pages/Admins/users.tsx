@@ -46,26 +46,22 @@ export const Users = () => {
     const BACKEND_API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT
 
     useEffect(() => {
-        axios.get<UserDetail[] | "ROLE_IS_ADMIN" | "ROLE_ISNOT_ADMIN" | "SERVER_SIDE_ERROR">(`${BACKEND_API_ENDPOINT}/administrator`, {withCredentials: true}).then(res => {
-            if (res.data === "ROLE_ISNOT_ADMIN" || res.data === "SERVER_SIDE_ERROR") {
-                navigate("/Home")
-                return
+        axios.get(`${BACKEND_API_ENDPOINT}/checkLoginSession`, {
+            headers: {
+                'access-token': localStorage.getItem("token")
             }
-        })
-
-        axios.get<UserDetail[] | "NOT_LOGGEDIN" | "SERVER_SIDE_ERROR">(`${BACKEND_API_ENDPOINT}/checkLoginSession`, {withCredentials: true}).then(res => {
-            if (res.data === "NOT_LOGGEDIN" || res.data === "SERVER_SIDE_ERROR") {
-                navigate("/MainPage")
-                return
+        }).then(res => { 
+            console.log(res)
+            if (res.data.message === "AUTHENTICATED") {
+                setUsername(res.data.username)
+                setFullname(res.data.userFullname)
+                if (res.data.userRole !== "Admin") {
+                    navigate('/Home')
+                }
+            } else {
+                navigate('/MainPage')
             }
-            setUsername(res.data[0].user_name)
-            setFullname(res.data[0].user_fullname)
-        })
-
-        setTimeout(function timer() {
-            console.clear()
-        }, 150); 
-
+         })
     }, [])
 
     const columns = [
@@ -132,14 +128,12 @@ export const Users = () => {
     }
 
     const logout = () => {
-        axios.get<"LOGOUT_ERROR" | "LOGGED_OUT">(`${BACKEND_API_ENDPOINT}/logout`, {withCredentials: true}).then(res => {
-            if (res.data === "LOGGED_OUT") {
-                window.location.reload()
-            } else {
-                alert('Logout error go check console')
-            }
-        })
+        localStorage.removeItem("token");
+        setTimeout(function timer() {
+            navigate("/MainPage")
+        }, 150);        
     }
+
 
     return (
         <div> 

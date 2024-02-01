@@ -33,17 +33,35 @@ export const MainPage = () => {
     const BACKEND_API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT
 
     useEffect(() => {
-        axios.get<UserDetail[] | "NOT_LOGGEDIN" | "SERVER_SIDE_ERROR" | "LOGGED_IN">(`${BACKEND_API_ENDPOINT}/checkLoginSession`, {withCredentials: true}).then(res => {
-            if (res.data === "NOT_LOGGEDIN" || res.data === "SERVER_SIDE_ERROR") {
-                return
-            } else {
-                navigate("/Home")
+        axios.get(`${BACKEND_API_ENDPOINT}/checkLoginSession`, {
+            headers: {
+                'access-token': localStorage.getItem("token")
             }
-        })
-        setTimeout(function timer() {
-            console.clear()
-        }, 150);  
+        }).then(res => { 
+            console.log(res)
+            if (res.data.message === "AUTHENTICATED") {
+                navigate('/home')
+            } else {
+                navigate('/MainPage')
+            }
+         })
     }, [])
+
+    const errorNotify = (Arg: string) => {
+        notification.error({
+            message: 'Error!',
+            description: Arg,
+            placement: 'topLeft'
+          })
+    }
+
+    const successNotify = (Arg: string) => {
+        notification.success({
+            message: 'Success!',
+            description: Arg,
+            placement: 'topLeft'
+          })
+    }
     
     const ToggleDisplay = (Arg: string) => {
         const Regbox = document.getElementById(`Register`);
@@ -60,83 +78,47 @@ export const MainPage = () => {
             }       
     }}
 
-    const Login = (e: any) => {
+    const Login = () => {
         if (!username || !password) {
-            notification.error({
-                message: 'Error',
-                description: 'Please fill out the forms',
-                placement: 'topLeft'
-              })
-            return
+            errorNotify("Please fill out the forms")
         } else {
-            axios.post<UserDetail[] | "WRONG" | "SEVER_SIDE_ERROR">(`${BACKEND_API_ENDPOINT}/login`, {
+            axios.post(`${BACKEND_API_ENDPOINT}/login`, {
                 username: username,
                 password: password
               }, {withCredentials: true})
-              .then(function (response) {
-                console.log(response);
-                if (response.data === "SEVER_SIDE_ERROR" || response.data === "WRONG") {
-                    console.clear()
-                    notification.error({
-                        message: 'Login failed',
-                        description: 'Username or Password is Incorrect',
-                        placement: 'topLeft'
-                      })
+              .then(function (res) {
+                console.log(res);
+                if (res.data.Login) {
+                    successNotify("Login Successful")
+                    localStorage.setItem("token", res.data.token)
+                    navigate('/Home')
                 } else {
-                    notification.success({
-                        message: 'Login Successful',
-                        description: 'Redirecting...',
-                        placement: 'topLeft'
-                      })
-                    setTimeout(function timer() {
-                        window.location.reload()
-                    }, 150);   
+                    errorNotify("Username or Password is Incorrect")
                 }
               })
         }
     }
 
-    const Register = (e: any) => {
+    const Register = () => {
         if (!reguser || !regpassword || !regconfirmpassword) {
-            notification.error({
-                message: 'Error',
-                description: 'Please fill out the forms',
-                placement: 'topLeft'
-              })
+            errorNotify("Please fill out the forms")
         } else if (regpassword !== regconfirmpassword) {
-            notification.error({
-                message: 'Cannot Register',
-                description: 'Password Does not Match',
-                placement: 'topLeft'
-              })
+            errorNotify("Password does not match!")
         } else if (String(regpassword).length < 6 || String(regconfirmpassword).length < 6) {
-            notification.error({
-                message: 'Cannt Register',
-                description: 'Password must be at least 6 characters long',
-                placement: 'topLeft'
-              })
+            errorNotify("Password must be at least 6 characters long")
         } else {
             axios.post(`${BACKEND_API_ENDPOINT}/register`, {
                 username: reguser,
                 password: regpassword,
                 fullname: reguser + '#' + Math.floor(Math.random() * (9999 - 1000 + 1) + 1000),
                 role: "User",
-                sessionID: 0
               })
               .then(function (response) {
                 console.log(response);
                 if (response.data === "MySQL_REG_COMPLETED!") {
-                    notification.success({
-                        message: 'Register Complete',
-                        description: 'You can now login!',
-                        placement: 'topLeft'
-                      })  
+                    successNotify("Registeration Success!")
                 } else if (response.data === "POST_ADD_USER_ERROR") {
-                    notification.error({
-                        message: 'Error',
-                        description: 'Authentication Server was down...',
-                        placement: 'topLeft'
-                      })
+                    errorNotify("Authentication Server was down...")
                 }
               })
         }

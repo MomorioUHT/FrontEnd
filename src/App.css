@@ -28,6 +28,13 @@ HTML, BODY {
   gap: 5px;
 }
 
+.problemPage {
+  display: table;
+  margin-right: auto;
+  margin-left: auto;
+  max-width: 1000px;
+}
+
 .inner-1 {
   border-right: 1px solid black;
 }

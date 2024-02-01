@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom";
-import { UserDetail,ProblemDetail } from "../Redux/hook"
+import { ProblemDetail } from "../Redux/hook"
 import { Helmet } from 'react-helmet';
 import {
     Layout, 
@@ -16,7 +16,6 @@ import {
     HomeOutlined,
     CodeOutlined,
     LogoutOutlined,
-    WechatOutlined
  } from '@ant-design/icons';
 
 const { Header, Sider, Content, Footer } = Layout;
@@ -64,15 +63,21 @@ export const Home = () => {
     ];
     
     useEffect(() => {
-        axios.get<UserDetail[] | "NOT_LOGGEDIN" | "SERVER_SIDE_ERROR">(`${BACKEND_API_ENDPOINT}/checkLoginSession`, {withCredentials: true}).then(res => {
-            if (res.data === "NOT_LOGGEDIN" || res.data === "SERVER_SIDE_ERROR") {
-                navigate("/MainPage")
-                return
+        axios.get(`${BACKEND_API_ENDPOINT}/checkLoginSession`, {
+            headers: {
+                'access-token': localStorage.getItem("token")
             }
-            setUsername(res.data[0].user_name)
-            setFullname(res.data[0].user_fullname)
-            setRole(res.data[0].user_role)
-        })
+        }).then(res => { 
+            console.log(res)
+            if (res.data.message === "AUTHENTICATED") {
+                setUsername(res.data.username)
+                setFullname(res.data.userFullname)
+                setRole(res.data.userRole)
+            } else {
+                navigate('/MainPage')
+            }
+         })
+
         axios.get<ProblemDetail[] | "GET_PROBLEM_ERROR">(`${BACKEND_API_ENDPOINT}/Problems`).then(res => {
             if (res.data === "GET_PROBLEM_ERROR") {
                 alert("Get Problem List Error!")
@@ -80,19 +85,14 @@ export const Home = () => {
                 setProblemList(res.data)
             }
         })
-        setTimeout(function timer() {
-            console.clear()
-        }, 150);  
+
     }, [])
 
     const logout = () => {
-        axios.get<"LOGOUT_ERROR" | "LOGGED_OUT">(`${BACKEND_API_ENDPOINT}/logout`, {withCredentials: true}).then(res => {
-            if (res.data === "LOGGED_OUT") {
-                window.location.reload()
-            } else {
-                alert('Logout error go check console')
-            }
-        })
+        localStorage.removeItem("token");
+        setTimeout(function timer() {
+            navigate("/MainPage")
+        }, 150);        
     }
 
     const gotoeditor = () => {
@@ -103,9 +103,6 @@ export const Home = () => {
         if (role === 'Admin') {
             navigate("/Admindashboard/CreateProblem")
         } 
-    }
-    const gotoglobalchat = () => {
-        navigate("/GlobalChat")
     }
     
     return (
@@ -120,21 +117,15 @@ export const Home = () => {
                     <Menu
                         theme="dark"
                         mode="inline"
-                        defaultSelectedKeys={['2']}
+                        defaultSelectedKeys={['1']}
                         items={[
                             {
                                 key: '1',
-                                icon: <WechatOutlined />,
-                                label: 'Global Chat',
-                                onClick: gotoglobalchat
-                            },
-                            {
-                                key: '2',
                                 icon: <HomeOutlined />,
                                 label: 'Home',
                             },
                             {
-                                key: '3',
+                                key: '2',
                                 icon: <CodeOutlined />,
                                 label: 'Playground',
                                 onClick: gotoeditor

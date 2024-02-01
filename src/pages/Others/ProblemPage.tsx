@@ -1,9 +1,10 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { UserDetail,ProblemDetail } from "../Redux/hook";
+import { ProblemDetail } from "../Redux/hook";
 import { Helmet } from 'react-helmet';
 import AceEditor from "react-ace";
+import ReactMarkdown from "react-markdown"
 
 import "ace-builds/src-noconflict/mode-python";
 import "ace-builds/src-noconflict/theme-dreamweaver";
@@ -18,11 +19,11 @@ import {  Button,
 import {  
     LeftCircleOutlined,
     LogoutOutlined,
-    InfoCircleOutlined,
     DoubleRightOutlined,
     BulbOutlined,
     CaretRightOutlined,
  } from '@ant-design/icons';
+
 import { Content } from "antd/es/layout/layout";
 
 const { Header,Footer } = Layout;
@@ -33,44 +34,38 @@ export const Problem1 = () => {
 
     const [username, setUsername] = useState('')
     const [fullname, setFullname] = useState('')
-    const [role, setRole] = useState('')
 
     const [code, setCode] = useState('')
 
     const [resultDisplay, setDisplaying] = useState('Click Submit to grading your program')
-    const [resultSubDisplay, setSubDisplaying] = useState('')
-    const [resultSymbol, setResultSymbol] = useState('')
-    const [currentProblem, setCurrentProblem] = useState<ProblemDetail[]>([])
 
-    const BACKEND_API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT
-    const navigate = useNavigate();
+    const [currentProblem, setCurrentProblem] = useState<ProblemDetail[]>([])
 
     const [loadings, setLoadings] = useState(false);
     const [language, setLanguage] = useState(null)
 
-    const enterLoading = (value: boolean) => {
-        setLoadings(value);
-    }
+    const BACKEND_API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT
+    const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get<UserDetail[] | "NOT_LOGGEDIN" | "SERVER_SIDE_ERROR">(`${BACKEND_API_ENDPOINT}/checkLoginSession`, {withCredentials: true}).then(res => {
-            if (res.data === "NOT_LOGGEDIN" || res.data === "SERVER_SIDE_ERROR") {
-                navigate("/MainPage")
-                return
+        axios.get(`${BACKEND_API_ENDPOINT}/checkLoginSession`, {
+            headers: {
+                'access-token': localStorage.getItem("token")
             }
-            setUsername(res.data[0].user_name)
-            setFullname(res.data[0].user_fullname)
-            setRole(res.data[0].user_role)
-        })
+        }).then(res => { 
+            console.log(res)
+            if (res.data.message === "AUTHENTICATED") {
+                setUsername(res.data.username)
+                setFullname(res.data.userFullname)
+            } else {
+                navigate('/MainPage')
+            }
+         })
 
-        axios.get<ProblemDetail[]>(`${BACKEND_API_ENDPOINT}/currentProblem/${id}`).then(res => {
-            if (res.data.length === 0) {
-                notification.error({
-                    message: 'Error',
-                    description: 'That Problem Does not exist...',
-                    placement: 'topLeft'
-                  })
-                  setTimeout(function timer() {
+        axios.get<ProblemDetail[] | "PROBLEM_NOT_FOUND">(`${BACKEND_API_ENDPOINT}/currentProblem/${id}`).then(res => {
+            if (res.data === "PROBLEM_NOT_FOUND") {
+                errorNotify("Problem does not exist")
+                setTimeout(function timer() {
                     navigate("/Home")
                 }, 150);  
             } else {
@@ -78,80 +73,59 @@ export const Problem1 = () => {
             }
         })
 
-        setTimeout(function timer() {
-            console.clear()
-        }, 150);  
     }, [])
+
+    const errorNotify = (Arg: string) => {
+        notification.error({
+            message: 'Error!',
+            description: Arg,
+            placement: 'topLeft'
+          })
+    }
+
+    const enterLoading = (value: boolean) => {
+        setLoadings(value);
+    }
 
     const SubmitCode = (ProblemID: String) => {
         if (!language) {
-            notification.error({
-                message: 'Error',
-                description: 'Please Select language to Submit!',
-                placement: 'topLeft'
-              }) 
-        } else if (code.replaceAll(" ", "") === '') {
-            notification.error({
-                message: 'Error',
-                description: 'The code is empty!',
-                placement: 'topLeft'
-              })            
+            errorNotify("Please select language to submit!")
         } else {
             enterLoading(true)
             setDisplaying(`In queue...`)
-            setResultSymbol('')
-            setSubDisplaying('')
+            window.scrollTo({top:0 ,behavior:'smooth'}); 
             axios.post(`${BACKEND_API_ENDPOINT}/Grading`, {
                 code: code,
                 problemID: ProblemID,
-                submitLanguage: language
+                submitLanguage: language,
+                submitUser: username
             }).then(res => {
                 if (res.data === 'QUEUE_NOT_AVALIBLE') {
-                    notification.info({
-                        message: 'The Server is quite busy',
-                        description: 'Try to queue again...',
-                        placement: 'topLeft'
-                      })
+                    errorNotify("Queue is not avalible")
                 } else if (res.data === 'ERROR WHILE SELECT PROBLEMS!') {
-                    notification.error({
-                        message: 'Error',
-                        description: 'That Problem Does not exist...',
-                        placement: 'topLeft'
-                      })
+                    errorNotify("Problem does not exist")
                 } else{
-                    if (res.data.includes('-') || res.data.includes('C') || res.data.includes('S')) {
+                    if (res.data.isPassed) {
                         enterLoading(false)
-                        setDisplaying(`[${res.data}]`)
-                        setResultSymbol('FAILED ✗')
-                        setSubDisplaying(`${String(res.data).replaceAll('-', '').replaceAll('C', '').length} cases out of ${String(res.data).length} passed`)
+                        setDisplaying(`PASSED ✓ [${res.data.gradingResult}]`)
                     } else {
                         enterLoading(false)
-                        setDisplaying(`[${res.data}]`)
-                        setResultSymbol('PASSED ✓')
-                        setSubDisplaying(`All ${res.data.length} cases passed`)
+                        setDisplaying(`FAILED ✗ [${res.data.gradingResult}]`)
                     }
                 }
             })
         }
     }
 
-    const gotoadmin = () => {
-        if (role === 'Admin') {
-            navigate("/Admindashboard/CreateProblem")
-        } 
-    }
     const gotohome = () => {
         navigate("/Home")
     }
 
     const logout = () => {
-        axios.get<"LOGOUT_ERROR" | "LOGGED_OUT">(`${BACKEND_API_ENDPOINT}/logout`, {withCredentials: true}).then(res => {
-            if (res.data === "LOGGED_OUT") {
-                window.location.reload()
-            } else {
-                alert('Logout error go check console')
-            }
-        })
+        localStorage.removeItem("token");
+        setTimeout(function timer() {
+            navigate("/MainPage")
+        }, 150);        
     }
 
     return (
@@ -175,7 +149,7 @@ export const Problem1 = () => {
                     }}
                     >Go Back</Button>
                 <div style={{float: "right", fontSize:'16px'}}>
-                        <span style={{color: 'white'}} onClick={gotoadmin}>{username} ({fullname})</span>
+                        <span style={{color: 'white'}}>{username} ({fullname})</span>
                         <Button
                             type="text"
                             icon={<LogoutOutlined />}
@@ -190,11 +164,11 @@ export const Problem1 = () => {
             </Header>   
 
             <Content style={{
-                margin: '10px 24px',
-                minHeight: '853px',    
+                margin: '50px',
+                minHeight: '853px', 
+                alignContent: 'center'   
             }}>
-                <div className="container">
-                    <div className="left">
+                <div className="problemPage">
                     {
                         currentProblem.map((list) => (
                             <div style={{marginTop: '20px'}}>
@@ -210,207 +184,72 @@ export const Problem1 = () => {
                                     color: 'black'
                                 }}>
                                     Level {list.ProblemLevel}
-                                </span><br /><br />
-
-                                <span style={{
-                                    fontSize:'20px',
-                                    color: 'black',
-                                    fontWeight: 'bold'
-                                }}>
-                                Description
-                                </span><br />
-
-                                <p style={{
-                                    fontSize:'15px',
-                                    color: 'black',
-                                    whiteSpace: 'pre'
-                                }}>
-                                {list.ProblemDescription}
-                                </p>
-
-                                <span style={{
-                                    fontSize:'20px',
-                                    color: 'black',
-                                    fontWeight: 'bold'
-                                }}>
-                                Example
                                 </span><br />
 
                                 <p style={{
                                     fontSize:'15px',
                                     color: 'black'
                                 }}>
-                                
-                                <p style={{
-                                    fontSize:'15px',
-                                    color: 'black',
-                                    whiteSpace: 'pre'
-                                }}>
-                                Input1
-                                </p>
-                                <AceEditor
-                                    mode="text"
-                                    theme="dreamweaver"
-                                    value={list.Input1}
-                                    fontSize={16}    
-                                    width="900px" 
-                                    maxLines={Infinity}  
-                                    readOnly={true}
-                                    editorProps={{ $blockScrolling: true }}
-                                />
-                                <p style={{
-                                    fontSize:'15px',
-                                    color: 'black',
-                                    whiteSpace: 'pre'
-                                }}>
-                                Output1
-                                </p>
-                                <AceEditor
-                                    mode="text"
-                                    theme="dreamweaver"
-                                    value={list.Output1}
-                                    fontSize={16}    
-                                    width="900px" 
-                                    maxLines={Infinity}  
-                                    readOnly={true}
-                                    editorProps={{ $blockScrolling: true }}
-                                /><br/>
+                                Latest Submission Result <CaretRightOutlined /> {resultDisplay}</p>
 
-                                <p style={{
-                                    fontSize:'15px',
-                                    color: 'black',
-                                    whiteSpace: 'pre'
-                                }}>
-                                Input2
-                                </p>
-                                <AceEditor
-                                    mode="text"
-                                    theme="dreamweaver"
-                                    value={list.Input2}
-                                    fontSize={16}    
-                                    width="900px" 
-                                    maxLines={Infinity}  
-                                    readOnly={true}
-                                    editorProps={{ $blockScrolling: true }}
-                                />
-                                <p style={{
-                                    fontSize:'15px',
-                                    color: 'black',
-                                    whiteSpace: 'pre'
-                                }}>
-                                Output2
-                                </p>
-                                <AceEditor
-                                    mode="text"
-                                    theme="dreamweaver"
-                                    value={list.Output2}
-                                    fontSize={16}    
-                                    width="900px" 
-                                    maxLines={Infinity}  
-                                    readOnly={true}
-                                    editorProps={{ $blockScrolling: true }}
-                                /><br/>
+                                <ReactMarkdown>{list.ProblemDescription}</ReactMarkdown><br/>
 
-                            <p style={{
-                                    fontSize:'15px',
-                                    color: 'black',
-                                    whiteSpace: 'pre'
-                                }}>
-                                Input3
-                                </p>
+                                <Button type="primary" loading={loadings} onClick={() => SubmitCode(`${id}`)}>
+                                    Submit <DoubleRightOutlined />
+                                </Button><br/><br/>
+
+                                <Select 
+                                    onChange={setLanguage}
+                                    style={{ width: 160,}}
+                                    placeholder="Submit language"
+                                    options={[
+                                        {
+                                        value: 'Python',
+                                        label: 'Python',
+                                        },
+                                        {
+                                        value: 'C',
+                                        label: 'C',
+                                        disabled: true
+                                        },
+                                        {
+                                        value: 'C++',
+                                        label: 'C++',
+                                        disabled: true,
+                                        },
+                                        {
+                                        value: 'C#',
+                                        label: 'C#',
+                                        disabled: true,
+                                        },
+                                        {
+                                        value: 'Java',
+                                        label: 'Java',
+                                        disabled: true,
+                                        },
+                                        {
+                                        value: 'Visual Basic',
+                                        label: 'Visual Basic',
+                                        disabled: true,
+                                        },
+                                    ]}
+                                /><br/><br/>
+
                                 <AceEditor
-                                    mode="text"
+                                    mode="python"
                                     theme="dreamweaver"
-                                    value={list.Input3}
+                                    onChange={setCode}
+                                    name="Code"
+                                    editorProps={{ $blockScrolling: true }}
                                     fontSize={16}    
                                     width="900px" 
-                                    maxLines={Infinity}  
-                                    readOnly={true}
-                                    editorProps={{ $blockScrolling: true }}
+                                    height="500px"   
                                 />
-                                <p style={{
-                                    fontSize:'15px',
-                                    color: 'black',
-                                    whiteSpace: 'pre'
-                                }}>
-                                Output3
-                                </p>
-                                <AceEditor
-                                    mode="text"
-                                    theme="dreamweaver"
-                                    value={list.Output3}
-                                    fontSize={16}    
-                                    width="900px" 
-                                    maxLines={Infinity}  
-                                    readOnly={true}
-                                    editorProps={{ $blockScrolling: true }}
-                                /><br/>
-                                
-                                </p>
+
                             </div>
                         ))                
                     }      
-                    </div>
-                    <div className="right">
-                        <p style={{
-                                fontSize:'15px',
-                                color: 'black'
-                        }}>
-                        Latest Submission Result <CaretRightOutlined /> {resultSymbol} {resultDisplay} <InfoCircleOutlined /> {resultSubDisplay}</p>
-
-                        <Button type="primary" loading={loadings} onClick={() => SubmitCode(`${id}`)}>
-                            Submit <DoubleRightOutlined />
-                        </Button><br/><br/>
-
-                        <Select 
-                                onChange={setLanguage}
-                                style={{ width: 160,}}
-                                placeholder="Submit language"
-                                options={[
-                                    {
-                                    value: 'Python',
-                                    label: 'Python',
-                                    },
-                                    {
-                                    value: 'C',
-                                    label: 'C',
-                                    disabled: true
-                                    },
-                                    {
-                                    value: 'C++',
-                                    label: 'C++',
-                                    disabled: true,
-                                    },
-                                    {
-                                    value: 'C#',
-                                    label: 'C#',
-                                    disabled: true,
-                                    },
-                                    {
-                                    value: 'Java',
-                                    label: 'Java',
-                                    disabled: true,
-                                    },
-                                    {
-                                    value: 'Visual Basic',
-                                    label: 'Visual Basic',
-                                    disabled: true,
-                                    },
-                                ]}
-                            /><br/><br/>
-
-                        <AceEditor
-                            mode="python"
-                            theme="dreamweaver"
-                            onChange={setCode}
-                            name="Code"
-                            editorProps={{ $blockScrolling: true }}
-                            fontSize={16}    
-                            width="900px" 
-                            height="800px"   
-                        />
-                    </div>
-                </div>    
+                </div>  
             </Content>
 
             <Footer style={{textAlign: 'center',}}>
