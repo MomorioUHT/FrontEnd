@@ -12,7 +12,6 @@ import {
     Result,
     notification
  } from 'antd';
-
  import {      
     MenuFoldOutlined,
     MenuUnfoldOutlined,
@@ -23,25 +22,25 @@ import {
     LeftCircleOutlined
  } from '@ant-design/icons';
 
-import { useProblemsQuery,useDeleteProblemMutation } from "../Redux/Api";
+import { useLabsQuery,useDeleteLabMutation } from "../Redux/Api";
 
 const { Header, Sider, Content, Footer } = Layout;
 
-export const ManageProblem = () => {
+export const ManageLabs = () => {
     const navigate = useNavigate();
 
-    const { data, error, isLoading, isFetching, isSuccess } = useProblemsQuery();
-    const { refetch } = useProblemsQuery();
+    const { data, error, isLoading, isFetching, isSuccess } = useLabsQuery();
+    const { refetch } = useLabsQuery();
 
-    const [ problemDeletion ] = useDeleteProblemMutation();
+    const [ labDeletion ] = useDeleteLabMutation();
 
     const [username, setUsername] = useState('')
     const [tag, settag] = useState('')
 
     const [collapsed, setCollapsed] = useState(false);
     const [confirmOpen, setConfirmopen] = useState(false);
-    const [currProblemIDToDelete, setCurrProblemIDToDelete] = useState('')
 
+    const [currLabID, setCurrLabToDelete] = useState('')
 
     const BACKEND_API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT
 
@@ -66,21 +65,19 @@ export const ManageProblem = () => {
 
     const columns = [
         {
-            title: 'Problem ID',
-            dataIndex: 'ProblemID',
-            key: 'ProblemID',
-            onCell: (record: any) => {
-                return {
-                    onClick: () => {
-                        gotoproblem(record.ProblemID)
-                    },
-                };
-            },
+            title: 'Lab Name',
+            dataIndex: 'LabName',
+            key: 'LabName',
         },
         {
-            title: 'Problem Name',
-            dataIndex: 'ProblemName',
-            key: 'ProblemName',
+            title: 'Lab Problems',
+            dataIndex: 'LabProblems',
+            key: 'LabProblems',
+        },
+        {
+            title: 'Lab ID',
+            dataIndex: 'LabID',
+            key: 'LabID',
         },
         {
             title: 'Action',
@@ -90,55 +87,51 @@ export const ManageProblem = () => {
             onCell: (record: any) => {
                 return {
                     onClick: () => {
-                        confirmDelete(record.ProblemID)
+                        confirmDelete(record.LabID)
                     },
                 };
             },
         }
     ];
 
-    const confirmDelete = (ProblemID: string) => {
+    const confirmDelete = (LabID: string) => {
         setConfirmopen(true)
-        setCurrProblemIDToDelete(ProblemID)
+        setCurrLabToDelete(LabID)
     }
     
-    const OkClick = async() => {
-        await setConfirmopen(false)
-        await problemDeletion(currProblemIDToDelete)
-        await refetch()
-        notification.success({
-            message: 'Delete Successful!',
-            description: `Problem ${currProblemIDToDelete} has been removed from the database.`,
-            placement: 'topLeft'
-          })
-    };
-
     const CancelClick = () => {
         setConfirmopen(false)
     };
 
+    const OkClick = async() => {
+        await setConfirmopen(false)
+        await labDeletion(currLabID)
+        await refetch()
+        notification.success({
+            message: 'Delete Successful!',
+            description: `Lab ${currLabID} has been removed from the database.`,
+            placement: 'topLeft'
+          })
+    };
+    
     const gotohome = () => {
         navigate('/Home')
-    }
-
-    const goToManageUsers = () => {
-        navigate('/AdminDashboard/Users')
     }
 
     const goToCreateProblem = () => {
         navigate("/AdminDashboard/CreateProblem")
     }
 
+    const goToManageProblems = () => {
+        navigate("/AdminDashboard/ManageProblems")
+    }
+
     const goToCreateLab = () => {
         navigate("/AdminDashboard/CreateLab")
     }
 
-    const goToManageLabs = () => {
-        navigate("/AdminDashboard/ManageLabs")
-    }
-
-    const gotoproblem = (problemID: String) => {
-        navigate(`/task/${problemID}`)
+    const goToManageUsers = () => {
+        navigate('/AdminDashboard/Users')
     }
 
     const logout = () => {
@@ -152,18 +145,19 @@ export const ManageProblem = () => {
     return (
         <div> 
             <Helmet>
-                <title>All Problems</title>
+                <title>Manage Labs</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
             </Helmet>
 
             <Modal open={confirmOpen} onOk={OkClick} onCancel={CancelClick} >
                 <Result 
                     status="info"
-                    title="Delete This Problem?"
+                    title="Delete This Lab?"
                     subTitle="This action cannot be undone."
                 >
                 </Result>
             </Modal>  
+            
             <Layout>
                 <Sider trigger={null} collapsible collapsed={collapsed} style={{height: 'auto'}}>
                      <Button
@@ -180,7 +174,7 @@ export const ManageProblem = () => {
                     <Menu
                         theme="dark"
                         mode="inline"
-                        defaultSelectedKeys={['4']}
+                        defaultSelectedKeys={['5']}
                         items={[
                             {
                                 key: '1',
@@ -204,12 +198,12 @@ export const ManageProblem = () => {
                                 key: '4',
                                 icon: <CodeOutlined />,
                                 label: 'Manage Problems',
+                                onClick: goToManageProblems
                             },
                             {
                                 key: '5',
                                 icon: <CodeOutlined />,
                                 label: 'Manage Labs',
-                                onClick: goToManageLabs
                             },
                         ]}
                     />
@@ -255,16 +249,16 @@ export const ManageProblem = () => {
                         marginLeft: '10px',
                         color: 'black'
                     }}>
-                        Manage Problems <br /><br />
+                        Manage Labs <br /><br />
                         {isFetching && <span>Fetching...</span>}
                         {isLoading && <span>Loading...</span>}
-                        {error && <span>Fetch Problems Failed!</span>}
+                        {error && <span>Fetch Labs Failed!</span>}
                         {isSuccess && <Table dataSource={data} columns={columns} style={{cursor: "pointer"}}/>}
 
                     </span><br/>               
                     
                     <Footer style={{textAlign: 'center',}}>
-                        Created with love by MomorioUHT UwU
+                        Lab ©2023 Created with love by MomorioUHT UwU
                     </Footer>
                 </Content>
             </Layout>

@@ -110,7 +110,7 @@ export const MainPage = () => {
             axios.post(`${BACKEND_API_ENDPOINT}/register`, {
                 username: reguser,
                 password: regpassword,
-                fullname: reguser + '#' + Math.floor(Math.random() * (9999 - 1000 + 1) + 1000),
+                tag: Math.floor(Math.random() * (9999 - 1000 + 1) + 1000),
                 role: "User",
               })
               .then(function (response) {

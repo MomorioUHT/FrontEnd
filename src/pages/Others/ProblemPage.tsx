@@ -13,31 +13,31 @@ import "ace-builds/src-noconflict/ext-language_tools";
 import {  Button, 
     notification, 
     Layout, 
-    Select
+    Select,
  } from 'antd';
 
 import {  
-    LeftCircleOutlined,
     LogoutOutlined,
     DoubleRightOutlined,
     BulbOutlined,
-    CaretRightOutlined,
  } from '@ant-design/icons';
 
+import TextArea from "antd/es/input/TextArea";
 import { Content } from "antd/es/layout/layout";
 
 const { Header,Footer } = Layout;
 
-export const Problem1 = () => {
+export const ProblemPage = () => {
 
     const {id} = useParams();
 
     const [username, setUsername] = useState('')
-    const [fullname, setFullname] = useState('')
+    const [tag, settag] = useState('')
 
     const [code, setCode] = useState('')
 
     const [resultDisplay, setDisplaying] = useState('Click Submit to grading your program')
+    const [explainResult, setExplainResult] = useState('')
 
     const [currentProblem, setCurrentProblem] = useState<ProblemDetail[]>([])
 
@@ -56,7 +56,8 @@ export const Problem1 = () => {
             console.log(res)
             if (res.data.message === "AUTHENTICATED") {
                 setUsername(res.data.username)
-                setFullname(res.data.userFullname)
+                settag(res.data.userTag)
+                getSubmitResult(res.data.username)
             } else {
                 navigate('/MainPage')
             }
@@ -75,6 +76,25 @@ export const Problem1 = () => {
 
     }, [])
 
+    const getSubmitResult = (username: string) => {
+        axios.post(`${BACKEND_API_ENDPOINT}/CheckSubmitResult`, {
+            idToCheck: id,
+            usernameToCheck: username,
+        }).then(res => {
+            console.log(res.data)
+            if (res.data.Result === "NONE") {
+                setDisplaying("```Click Submit to grading your program```")
+            } else {
+                if (res.data.isPassed) {
+                    enterLoading(false)
+                    setDisplaying("```" + `PASSED ✓ [${res.data.Result}]` + "```")
+                } else {
+                    enterLoading(false)
+                    setDisplaying("```" + `FAILED ✗ [${res.data.Result}]` + "```")
+                }
+            }
+        }) 
+    }
     const errorNotify = (Arg: string) => {
         notification.error({
             message: 'Error!',
@@ -91,6 +111,7 @@ export const Problem1 = () => {
         if (!language) {
             errorNotify("Please select language to submit!")
         } else {
+            setExplainResult('')
             enterLoading(true)
             setDisplaying(`In queue...`)
             window.scrollTo({top:0 ,behavior:'smooth'}); 
@@ -105,20 +126,17 @@ export const Problem1 = () => {
                 } else if (res.data === 'ERROR WHILE SELECT PROBLEMS!') {
                     errorNotify("Problem does not exist")
                 } else{
+                    setExplainResult(res.data.explainResult)
                     if (res.data.isPassed) {
                         enterLoading(false)
-                        setDisplaying(`PASSED ✓ [${res.data.gradingResult}]`)
+                        setDisplaying("```" + `PASSED ✓ [${res.data.gradingResult}]` + "```")
                     } else {
                         enterLoading(false)
-                        setDisplaying(`FAILED ✗ [${res.data.gradingResult}]`)
+                        setDisplaying("```" + `FAILED ✗ [${res.data.gradingResult}]` + "```")
                     }
                 }
             })
         }
-    }
-
-    const gotohome = () => {
-        navigate("/Home")
     }
 
     const logout = () => {
@@ -137,19 +155,8 @@ export const Problem1 = () => {
 
             <Layout>
             <Header style={{padding: 0}}>
-                <Button
-                    type="text"
-                    icon={<LeftCircleOutlined />}
-                    onClick={gotohome}
-                    style={{
-                    fontSize: '16px',
-                    width: 64,
-                    height: 64,
-                    color: 'white',
-                    }}
-                    >Go Back</Button>
                 <div style={{float: "right", fontSize:'16px'}}>
-                        <span style={{color: 'white'}}>{username} ({fullname})</span>
+                        <span style={{color: 'white'}}>{username} ({tag})</span>
                         <Button
                             type="text"
                             icon={<LogoutOutlined />}
@@ -186,13 +193,17 @@ export const Problem1 = () => {
                                     Level {list.ProblemLevel}
                                 </span><br />
 
-                                <p style={{
-                                    fontSize:'15px',
-                                    color: 'black'
-                                }}>
-                                Latest Submission Result <CaretRightOutlined /> {resultDisplay}</p>
+                                <ReactMarkdown>{"Latest Submission Result ᐅ " + resultDisplay}</ReactMarkdown>
 
                                 <ReactMarkdown>{list.ProblemDescription}</ReactMarkdown><br/>
+
+                                <TextArea 
+                                    name="input"
+                                    size="large" 
+                                    placeholder="Place your code here and submit" 
+                                    onChange={(e: any) => setCode(e.target.value)}
+                                    style={{height: 500, width: 900}}
+                                /><br /><br /><br />
 
                                 <Button type="primary" loading={loadings} onClick={() => SubmitCode(`${id}`)}>
                                     Submit <DoubleRightOutlined />
@@ -210,7 +221,7 @@ export const Problem1 = () => {
                                         {
                                         value: 'C',
                                         label: 'C',
-                                        disabled: true
+                                        disabled: true,
                                         },
                                         {
                                         value: 'C++',
@@ -234,18 +245,9 @@ export const Problem1 = () => {
                                         },
                                     ]}
                                 /><br/><br/>
-
-                                <AceEditor
-                                    mode="python"
-                                    theme="dreamweaver"
-                                    onChange={setCode}
-                                    name="Code"
-                                    editorProps={{ $blockScrolling: true }}
-                                    fontSize={16}    
-                                    width="900px" 
-                                    height="500px"   
-                                />
-
+                                
+                                <div dangerouslySetInnerHTML={{ __html: explainResult }} />
+                                
                             </div>
                         ))                
                     }      
@@ -253,8 +255,9 @@ export const Problem1 = () => {
             </Content>
 
             <Footer style={{textAlign: 'center',}}>
-                Lab ©2023 Created with love by MomorioUHT UwU
+                Created with love by MomorioUHT UwU
             </Footer>
+
         </Layout>  
         </div>
     )

@@ -1,7 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom";
-import { UserDetail} from "../Redux/hook"
 import { Helmet } from 'react-helmet';
 
 import {
@@ -27,7 +26,7 @@ import { useUsersQuery,useDeleteUserMutation } from "../Redux/Api";
 
 const { Header, Sider, Content, Footer } = Layout;
 
-export const Users = () => {
+export const ManageUsers = () => {
     const navigate = useNavigate();
 
     const { data, error, isLoading, isFetching, isSuccess } = useUsersQuery();
@@ -36,7 +35,7 @@ export const Users = () => {
     const [ userDeletion ] = useDeleteUserMutation();
 
     const [username, setUsername] = useState('')
-    const [fullname, setFullname] = useState('')
+    const [tag, settag] = useState('')
 
     const [collapsed, setCollapsed] = useState(false);
     const [confirmOpen, setConfirmopen] = useState(false);
@@ -54,7 +53,7 @@ export const Users = () => {
             console.log(res)
             if (res.data.message === "AUTHENTICATED") {
                 setUsername(res.data.username)
-                setFullname(res.data.userFullname)
+                settag(res.data.userTag)
                 if (res.data.userRole !== "Admin") {
                     navigate('/Home')
                 }
@@ -72,8 +71,8 @@ export const Users = () => {
         },
         {
             title: 'Full Name',
-            dataIndex: 'user_fullname',
-            key: 'user_fullname',
+            dataIndex: 'user_tag',
+            key: 'user_tag',
         },
         {
             title: 'Role',
@@ -119,12 +118,20 @@ export const Users = () => {
         navigate('/Home')
     }
 
-    const gotocreateproblem = () => {
+    const goToCreateProblem = () => {
         navigate("/AdminDashboard/CreateProblem")
     }
 
-    const gotopythonproblem = () => {
+    const goToManageProblems = () => {
         navigate("/AdminDashboard/ManageProblems")
+    }
+
+    const goToCreateLab = () => {
+        navigate("/AdminDashboard/CreateLab")
+    }
+
+    const goToManageLabs = () => {
+        navigate("/AdminDashboard/ManageLabs")
     }
 
     const logout = () => {
@@ -167,24 +174,36 @@ export const Users = () => {
                     <Menu
                         theme="dark"
                         mode="inline"
-                        defaultSelectedKeys={['2']}
+                        defaultSelectedKeys={['3']}
                         items={[
                             {
                                 key: '1',
                                 icon: <FormOutlined />,
                                 label: 'Create Problems',
-                                onClick: gotocreateproblem
+                                onClick: goToCreateProblem
                             },
                             {
                                 key: '2',
+                                icon: <FormOutlined  />,
+                                label: 'Create Labs',
+                                onClick: goToCreateLab
+                            },
+                            {
+                                key: '3',
                                 icon: <UserOutlined />,
                                 label: 'Manage Users',
                             },
                             {
-                                key: '3',
+                                key: '4',
                                 icon: <CodeOutlined />,
-                                label: 'Python Problems',
-                                onClick: gotopythonproblem
+                                label: 'Manage Problems',
+                                onClick: goToManageProblems
+                            },
+                            {
+                                key: '5',
+                                icon: <CodeOutlined />,
+                                label: 'Manage Labs',
+                                onClick: goToManageLabs
                             },
                         ]}
                     />
@@ -204,7 +223,7 @@ export const Users = () => {
                         }}
                     />
                     <div style={{float: "right", fontSize:'16px'}}>
-                        <span style={{color: 'white'}}>{username} ({fullname})</span>
+                        <span style={{color: 'white'}}>{username} ({tag})</span>
                         <Button
                             type="text"
                             icon={<LogoutOutlined />}

@@ -2,14 +2,14 @@ import axios from "axios";
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom";
 import { Helmet } from 'react-helmet';
+import { EachProblem } from "../Redux/hook";
 
 import {
     Layout, 
     Menu,
     Button,
     Table,
-    Modal,
-    Result,
+    Input,
     notification
  } from 'antd';
 
@@ -20,28 +20,32 @@ import {
     CodeOutlined,
     LogoutOutlined,
     FormOutlined,
-    LeftCircleOutlined
+    LeftCircleOutlined,
+    PlusSquareOutlined,
+    EditOutlined,
+    MinusSquareOutlined,
+    ForwardOutlined
  } from '@ant-design/icons';
 
 import { useProblemsQuery,useDeleteProblemMutation } from "../Redux/Api";
 
 const { Header, Sider, Content, Footer } = Layout;
 
-export const ManageProblem = () => {
+export const CreateLab = () => {
     const navigate = useNavigate();
 
     const { data, error, isLoading, isFetching, isSuccess } = useProblemsQuery();
-    const { refetch } = useProblemsQuery();
-
-    const [ problemDeletion ] = useDeleteProblemMutation();
 
     const [username, setUsername] = useState('')
     const [tag, settag] = useState('')
 
     const [collapsed, setCollapsed] = useState(false);
-    const [confirmOpen, setConfirmopen] = useState(false);
-    const [currProblemIDToDelete, setCurrProblemIDToDelete] = useState('')
 
+    const [labName, setLabName] = useState('')
+    const [labID, setLabID] = useState('')
+    const [labProblems, setLabProblemsList] = useState<EachProblem[]>([]);
+    const [labProblemsID, setLabProblemsListID]: any[] = useState([]);
+    const [loadingCreateLab, setLoadingCreateLab] = useState(false);
 
     const BACKEND_API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT
 
@@ -64,18 +68,11 @@ export const ManageProblem = () => {
          })
     }, [])
 
-    const columns = [
+    const columnsSelected = [
         {
             title: 'Problem ID',
             dataIndex: 'ProblemID',
             key: 'ProblemID',
-            onCell: (record: any) => {
-                return {
-                    onClick: () => {
-                        gotoproblem(record.ProblemID)
-                    },
-                };
-            },
         },
         {
             title: 'Problem Name',
@@ -85,37 +82,93 @@ export const ManageProblem = () => {
         {
             title: 'Action',
             render: () => (
-                <span>Delete</span>
+                <span><MinusSquareOutlined /> Remove</span>
               ),
             onCell: (record: any) => {
                 return {
                     onClick: () => {
-                        confirmDelete(record.ProblemID)
+                        removeProblemFromList(record.ProblemID)
                     },
                 };
             },
         }
     ];
 
-    const confirmDelete = (ProblemID: string) => {
-        setConfirmopen(true)
-        setCurrProblemIDToDelete(ProblemID)
-    }
+    const columnsAll = [
+        {
+            title: 'Problem ID',
+            dataIndex: 'ProblemID',
+            key: 'ProblemID',
+        },
+        {
+            title: 'Problem Name',
+            dataIndex: 'ProblemName',
+            key: 'ProblemName',
+        },
+        {
+            title: 'Action',
+            render: () => (
+                <span><PlusSquareOutlined /> Add</span>
+              ),
+            onCell: (record: any) => {
+                return {
+                    onClick: () => {
+                        addProblemToList(record.ProblemName, record.ProblemID)
+                    },
+                };
+            },
+        }
+    ];
     
-    const OkClick = async() => {
-        await setConfirmopen(false)
-        await problemDeletion(currProblemIDToDelete)
-        await refetch()
+    const successNotify = (Arg: string) => {
         notification.success({
-            message: 'Delete Successful!',
-            description: `Problem ${currProblemIDToDelete} has been removed from the database.`,
+            message: 'Success!',
+            description: Arg,
             placement: 'topLeft'
           })
+    }
+
+    const errorNotify = (Arg: string) => {
+        notification.error({
+            message: 'Error!',
+            description: Arg,
+            placement: 'topLeft'
+          })
+    }
+
+    const addProblemToList = (newProblemName: string, newProblemID: string) => {
+        const newProblem: EachProblem = { ProblemName: newProblemName, ProblemID: newProblemID };
+        setLabProblemsList((list: EachProblem[]) => [...list, newProblem]);
+        setLabProblemsListID((list: any) => {
+            if (list.length === 0) {
+              return [newProblemID];
+            } else {
+              return [...list, newProblemID];
+            }
+        });
+    };
+    
+    const removeProblemFromList = (ProblemID: string) => {
+        setLabProblemsList((list: EachProblem[]) => list.filter((problem) => problem.ProblemID !== ProblemID));
+        setLabProblemsListID((list: any) => list.filter((id: string) => id !== ProblemID));
     };
 
-    const CancelClick = () => {
-        setConfirmopen(false)
-    };
+    const confirmCreateLab = () => {
+        const stringLabProblemList = labProblemsID.join(',');
+        setLoadingCreateLab(true)
+        axios.post<'SAVE_LAB_FAILED' | 'SAVE_LAB_SUCCESS'>(`${BACKEND_API_ENDPOINT}/CreateLab`, {
+            sentLabName: labName,
+            sentLabID: labID,
+            sentLabProblemList: stringLabProblemList
+        }).then(res => {
+            if (res.data === "SAVE_LAB_SUCCESS") {
+                successNotify("The lab has been saved!")
+            } else {
+                errorNotify("There is an error saving the lab!")
+            }
+            setLoadingCreateLab(false)
+        })
+    }
 
     const gotohome = () => {
         navigate('/Home')
@@ -129,16 +182,12 @@ export const ManageProblem = () => {
         navigate("/AdminDashboard/CreateProblem")
     }
 
-    const goToCreateLab = () => {
-        navigate("/AdminDashboard/CreateLab")
+    const goToManageProblems = () => {
+        navigate("/AdminDashboard/ManageProblems")
     }
 
     const goToManageLabs = () => {
         navigate("/AdminDashboard/ManageLabs")
-    }
-
-    const gotoproblem = (problemID: String) => {
-        navigate(`/task/${problemID}`)
     }
 
     const logout = () => {
@@ -152,18 +201,10 @@ export const ManageProblem = () => {
     return (
         <div> 
             <Helmet>
-                <title>All Problems</title>
+                <title>Create Lab</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
             </Helmet>
-
-            <Modal open={confirmOpen} onOk={OkClick} onCancel={CancelClick} >
-                <Result 
-                    status="info"
-                    title="Delete This Problem?"
-                    subTitle="This action cannot be undone."
-                >
-                </Result>
-            </Modal>  
+ 
             <Layout>
                 <Sider trigger={null} collapsible collapsed={collapsed} style={{height: 'auto'}}>
                      <Button
@@ -180,7 +221,7 @@ export const ManageProblem = () => {
                     <Menu
                         theme="dark"
                         mode="inline"
-                        defaultSelectedKeys={['4']}
+                        defaultSelectedKeys={['2']}
                         items={[
                             {
                                 key: '1',
@@ -192,7 +233,6 @@ export const ManageProblem = () => {
                                 key: '2',
                                 icon: <FormOutlined  />,
                                 label: 'Create Labs',
-                                onClick: goToCreateLab
                             },
                             {
                                 key: '3',
@@ -204,6 +244,7 @@ export const ManageProblem = () => {
                                 key: '4',
                                 icon: <CodeOutlined />,
                                 label: 'Manage Problems',
+                                onClick: goToManageProblems
                             },
                             {
                                 key: '5',
@@ -255,11 +296,34 @@ export const ManageProblem = () => {
                         marginLeft: '10px',
                         color: 'black'
                     }}>
-                        Manage Problems <br /><br />
+                        Create Lab<br /><br />
+                        <Input 
+                            name="input"
+                            size="large" 
+                            placeholder="Lab Name" 
+                            prefix={<EditOutlined />} 
+                            onChange={(e) => setLabName(e.target.value)}
+                            style={{width: 250}}
+                        />
+                        <Input 
+                            name="input"
+                            size="large" 
+                            placeholder="Lab ID (any)" 
+                            prefix={<EditOutlined />} 
+                            onChange={(e) => setLabID(e.target.value)}
+                            style={{width: 250}}
+                        />
+                        <Button type="primary" icon={<ForwardOutlined />} onClick={confirmCreateLab} loading={loadingCreateLab}>Test Run</Button>
+                        <br /><br />
+
+                        Current problems in this lab (You need to sort it by yourself)<br /><br />
+                        <Table dataSource={labProblems} columns={columnsSelected} style={{cursor: "pointer"}}/>
+
+                        Select problems to put in the lab <br /><br />
                         {isFetching && <span>Fetching...</span>}
                         {isLoading && <span>Loading...</span>}
                         {error && <span>Fetch Problems Failed!</span>}
-                        {isSuccess && <Table dataSource={data} columns={columns} style={{cursor: "pointer"}}/>}
+                        {isSuccess && <Table dataSource={data} columns={columnsAll} style={{cursor: "pointer"}}/>}
 
                     </span><br/>               
                     

@@ -1,25 +1,24 @@
 import axios from "axios";
 import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom";
-import { LabDetail, ProblemDetail } from "../Redux/hook"
+import { useNavigate, useParams } from "react-router-dom";
+import { ProblemDetail } from "../Redux/hook"
 import { Helmet } from 'react-helmet';
 import {
     Layout, 
-    Menu,
     Button,
-    Table
+    Table,
+    notification
  } from 'antd';
 
  import {      
-    MenuFoldOutlined,
-    MenuUnfoldOutlined,
-    HomeOutlined,
     LogoutOutlined,
  } from '@ant-design/icons';
 
 const { Header, Sider, Content, Footer } = Layout;
 
-export const Home = () => {
+export const LabPage = () => {
+
+    const { LabName } = useParams();
 
     const navigate = useNavigate();
 
@@ -27,32 +26,23 @@ export const Home = () => {
     const [tag, settag] = useState('')
     const [role, setRole] = useState('')
 
-    const [collapsed, setCollapsed] = useState(false);
+    const [currentLabName, setCurrentLabName] = useState('');
+
     const [problemList, setProblemList] = useState<ProblemDetail[]>([])
-    const [labList, setLablist] = useState<LabDetail[]>([])
 
     const BACKEND_API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT
 
-    const columnsLab = [
-        {
-            title: 'Lab Name',
-            dataIndex: 'LabName',
-            key: 'LabName',
-            onCell: (record: any) => {
-                return {
-                    onClick: () => {
-                        gotoLab(record.LabID)
-                    },
-                };
-            },
-        },
-    ];
+    const gotoproblem = (problemID: String) => {
+        navigate(`/task/${problemID}`)
+    }
 
-    const columnsAll = [
+    const columns = [
         {
-            title: 'Problem Name',
-            dataIndex: 'ProblemName',
-            key: 'ProblemName',
+            title: 'Task #',
+            dataIndex: 'index',
+            key: 'index',
+            render: (index: any) => <span>{index + 1}</span>,
+            width: 100,
             onCell: (record: any) => {
                 return {
                     onClick: () => {
@@ -62,14 +52,16 @@ export const Home = () => {
             },
         },
         {
-            title: 'Level',
-            dataIndex: 'ProblemLevel',
-            key: 'ProblemLevel',
-        },
-        {
-            title: 'Problem ID',
-            dataIndex: 'ProblemID',
-            key: 'ProblemID',
+            title: "Problems",
+            dataIndex: 'ProblemName',
+            key: 'ProblemName',
+            onCell: (record: any) => {
+                return {
+                    onClick: () => {
+                        gotoproblem(record.ProblemID);
+                    },
+                };
+            },
         }
     ];
     
@@ -89,21 +81,44 @@ export const Home = () => {
             }
          })
 
-        axios.get<ProblemDetail[] | "GET_PROBLEM_ERROR">(`${BACKEND_API_ENDPOINT}/Problems`).then(res => {
-            if (res.data === "GET_PROBLEM_ERROR") {
-                alert("Get Problem List Error!")
+        axios.post<ProblemDetail[] | "NOT_FOUND">(`${BACKEND_API_ENDPOINT}/GetLabContents/${LabName}`).then(res => {
+            console.log(res.data)
+            if (res.data === "NOT_FOUND") {
+                errorNotify("That lab does not exist")
+                setTimeout(function timer() {
+                    navigate("/Home")
+                }, 150);  
             } else {
                 setProblemList(res.data)
             }
         })
 
-        axios.get<LabDetail[] | "GET_LAB_ERROR">(`${BACKEND_API_ENDPOINT}/labs`).then(res => {
-            if (res.data !== "GET_LAB_ERROR") {
-                setLablist(res.data)
-            }
+        axios.get(`${BACKEND_API_ENDPOINT}/GetLabName/${LabName}`).then(res => {
+            console.log(res.data)
+            setCurrentLabName(res.data)
         })
 
     }, [])
+
+    const getLabDetails = (username: String) => {
+        axios.post<ProblemDetail[] | "NOT_FOUND">(`${BACKEND_API_ENDPOINT}/GetLabContents/${LabName}`, {
+            username: username
+        }).then(res => {
+            console.log(res.data)
+            if (res.data === "NOT_FOUND") {
+                errorNotify("That lab does not exist")
+                setTimeout(function timer() {
+                    navigate("/Home")
+                }, 150);  
+            } else {
+                setProblemList(res.data)
+            }
+        })
+        
+        axios.get(`${BACKEND_API_ENDPOINT}/GetLabName/${LabName}`).then(res => {
+            setCurrentLabName(res.data)
+        })
+    }
 
     const logout = () => {
         localStorage.removeItem("token");
@@ -112,12 +127,12 @@ export const Home = () => {
         }, 150);        
     }
 
-    const gotoLab = (LabID: String) => {
-        navigate(`/Lab/${LabID}`)
-    }
-
-    const gotoproblem = (problemID: String) => {
-        navigate(`/task/${problemID}`)
+    const errorNotify = (Arg: string) => {
+        notification.error({
+            message: 'Error!',
+            description: Arg,
+            placement: 'topLeft'
+          })
     }
 
     const gotoadmin = () => {
@@ -129,39 +144,12 @@ export const Home = () => {
     return (
         <div>   
             <Helmet>
-                <title>Home</title>
+                <title>Lab</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
             </Helmet> 
-
-            <Layout>
-                <Sider trigger={null} collapsible collapsed={collapsed} style={{height: 'auto'}}>
-                    <Menu
-                        theme="dark"
-                        mode="inline"
-                        defaultSelectedKeys={['1']}
-                        items={[
-                            {
-                                key: '1',
-                                icon: <HomeOutlined />,
-                                label: 'Home',
-                            }
-                        ]}
-                    />
-                </Sider>
-            
+        
             <Layout>
                 <Header style={{padding: 0,}}>
-                    <Button
-                        type="text"
-                        icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-                        onClick={() => setCollapsed(!collapsed)}
-                        style={{
-                        fontSize: '16px',
-                        width: 64,
-                        height: 64,
-                        color: 'white'
-                        }}
-                    />
                     <div style={{float: "right", fontSize:'16px'}}>
                         <span style={{color: 'white', cursor: 'pointer'}} onClick={gotoadmin}>{username} ({tag})</span>
                         <Button
@@ -188,17 +176,14 @@ export const Home = () => {
                         fontSize:'30px',
                         color: 'black'
                     }}>
-                        Labs
+                        {currentLabName} 
                     </span><br /><br />
-                    <Table dataSource={labList} columns={columnsLab} style={{cursor: "pointer"}}/><br/><br/>
-{/* 
-                    <Table dataSource={problemList} columns={columnsAll} style={{cursor: "pointer"}}/> */}
+                    <Table dataSource={problemList.map((item, index) => ({ ...item, index }))} columns={columns} style={{cursor: "pointer"}} />
                     
-                    <Footer style={{textAlign: 'center'}}>
+                    <Footer style={{textAlign: 'center',}}>
                         Created with love by MomorioUHT UwU
                     </Footer>
                 </Content>
-            </Layout>
             </Layout>
         </div>
     )

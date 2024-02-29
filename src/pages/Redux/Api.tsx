@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
-import { ProblemDetail,UserDetail } from "./hook"
+import { ProblemDetail,UserDetail,LabDetail } from "./hook"
 
 const BACKEND_API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT
 
@@ -51,6 +51,25 @@ export const userApi = createApi({
     })
 })
 
+export const labApi = createApi({
+    reducerPath: "labApi",
+    baseQuery: fetchBaseQuery({ baseUrl: `${BACKEND_API_ENDPOINT}`}),
+    endpoints: (builder) => ({
+        Labs: builder.query<LabDetail[], void>({
+            query: () => "labs",
+        }),
+        DeleteLab: builder.mutation<void, String>({
+            query: (labID) => ({
+                url: '/deleteLab',
+                method: "POST",
+                body: {
+                    labIDToDelete: labID
+                }
+            })
+        })
+    })
+})
+
 export const { 
     useProblemsQuery, 
     useCurrentProblemQuery,
@@ -62,3 +81,8 @@ export const {
     useUsersQuery,
     useDeleteUserMutation,
 } = userApi;
+
+export const {
+    useLabsQuery,
+    useDeleteLabMutation,
+} = labApi;
