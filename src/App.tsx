@@ -9,6 +9,7 @@ import { ManageProblem } from './pages/Admins/ManageProblems';
 import { CreateLab } from './pages/Admins/CreateLab';
 import { LabPage } from './pages/Others/LabPage';
 import { ManageLabs } from './pages/Admins/ManageLab';
+import { LabProgressPage } from './pages/Admins/LabProgess';
 
 function App() {
   return (
@@ -22,9 +23,10 @@ function App() {
         <Route path="AdminDashboard/ManageProblems" element={<ManageProblem />} />
         <Route path="AdminDashboard/CreateProblem" element={<CreateProblem />} />
         <Route path="AdminDashboard/CreateLab" element={<CreateLab />} />
-        <Route path="task/:id" element={<ProblemPage />} />
+        <Route path="task/:problemID" element={<ProblemPage />} />
         <Route path="Lab/:LabName" element={<LabPage />} />
         <Route path="AdminDashboard/ManageLabs" element={<ManageLabs />} />
+        <Route path="AdminDashboard/LabProgress/:LabName2" element={<LabProgressPage />} />
       </Routes>
     </div>
   );

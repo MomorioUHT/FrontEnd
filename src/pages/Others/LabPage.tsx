@@ -100,26 +100,6 @@ export const LabPage = () => {
 
     }, [])
 
-    const getLabDetails = (username: String) => {
-        axios.post<ProblemDetail[] | "NOT_FOUND">(`${BACKEND_API_ENDPOINT}/GetLabContents/${LabName}`, {
-            username: username
-        }).then(res => {
-            console.log(res.data)
-            if (res.data === "NOT_FOUND") {
-                errorNotify("That lab does not exist")
-                setTimeout(function timer() {
-                    navigate("/Home")
-                }, 150);  
-            } else {
-                setProblemList(res.data)
-            }
-        })
-        
-        axios.get(`${BACKEND_API_ENDPOINT}/GetLabName/${LabName}`).then(res => {
-            setCurrentLabName(res.data)
-        })
-    }
-
     const logout = () => {
         localStorage.removeItem("token");
         setTimeout(function timer() {

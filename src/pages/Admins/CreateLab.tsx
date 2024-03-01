@@ -313,7 +313,7 @@ export const CreateLab = () => {
                             onChange={(e) => setLabID(e.target.value)}
                             style={{width: 250}}
                         />
-                        <Button type="primary" icon={<ForwardOutlined />} onClick={confirmCreateLab} loading={loadingCreateLab}>Test Run</Button>
+                        <Button type="primary" icon={<ForwardOutlined />} onClick={confirmCreateLab} loading={loadingCreateLab}>Create Lab</Button>
                         <br /><br />
 
                         Current problems in this lab (You need to sort it by yourself)<br /><br />

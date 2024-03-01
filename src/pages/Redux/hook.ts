@@ -27,3 +27,8 @@ export interface ProblemDetail {
 export interface LabDetail {
     LabName: string;
 }
+
+export interface LabProgress {
+    user_name: string;
+    [problemID: string]: string; 
+}

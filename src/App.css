@@ -53,6 +53,7 @@ HTML, BODY {
 .tableElements {
   border: 1px solid;
   padding-right: 60px;
+  padding-left: 60px;
   padding-bottom: 40px;
   white-space: pre;
   text-align: left;
@@ -72,7 +73,6 @@ HTML, BODY {
   border: 1px solid;
   padding: 10px;
 }
-
 
 @keyframes fadeIn {  
   from {  

@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ProblemDetail } from "../Redux/hook";
 import { Helmet } from 'react-helmet';
-import AceEditor from "react-ace";
 import ReactMarkdown from "react-markdown"
 
 import "ace-builds/src-noconflict/mode-python";
@@ -29,7 +28,7 @@ const { Header,Footer } = Layout;
 
 export const ProblemPage = () => {
 
-    const {id} = useParams();
+    const { problemID } = useParams();
 
     const [username, setUsername] = useState('')
     const [tag, settag] = useState('')
@@ -63,7 +62,7 @@ export const ProblemPage = () => {
             }
          })
 
-        axios.get<ProblemDetail[] | "PROBLEM_NOT_FOUND">(`${BACKEND_API_ENDPOINT}/currentProblem/${id}`).then(res => {
+        axios.get<ProblemDetail[] | "PROBLEM_NOT_FOUND">(`${BACKEND_API_ENDPOINT}/currentProblem/${problemID}`).then(res => {
             if (res.data === "PROBLEM_NOT_FOUND") {
                 errorNotify("Problem does not exist")
                 setTimeout(function timer() {
@@ -78,19 +77,19 @@ export const ProblemPage = () => {
 
     const getSubmitResult = (username: string) => {
         axios.post(`${BACKEND_API_ENDPOINT}/CheckSubmitResult`, {
-            idToCheck: id,
+            idToCheck: problemID,
             usernameToCheck: username,
         }).then(res => {
             console.log(res.data)
-            if (res.data.Result === "NONE") {
-                setDisplaying("```Click Submit to grading your program```")
+            if (res.data.Result === "None") {
+                setDisplaying("Click Submit to grading your program")
             } else {
                 if (res.data.isPassed) {
                     enterLoading(false)
-                    setDisplaying("```" + `PASSED ✓ [${res.data.Result}]` + "```")
+                    setDisplaying(`PASSED ✓ [${res.data.Result}]`)
                 } else {
                     enterLoading(false)
-                    setDisplaying("```" + `FAILED ✗ [${res.data.Result}]` + "```")
+                    setDisplaying(`FAILED ✗ [${res.data.Result}]`)
                 }
             }
         }) 
@@ -129,10 +128,10 @@ export const ProblemPage = () => {
                     setExplainResult(res.data.explainResult)
                     if (res.data.isPassed) {
                         enterLoading(false)
-                        setDisplaying("```" + `PASSED ✓ [${res.data.gradingResult}]` + "```")
+                        setDisplaying(`PASSED ✓ [${res.data.gradingResult}]`)
                     } else {
                         enterLoading(false)
-                        setDisplaying("```" + `FAILED ✗ [${res.data.gradingResult}]` + "```")
+                        setDisplaying(`FAILED ✗ [${res.data.gradingResult}]`)
                     }
                 }
             })
@@ -193,7 +192,7 @@ export const ProblemPage = () => {
                                     Level {list.ProblemLevel}
                                 </span><br />
 
-                                <ReactMarkdown>{"Latest Submission Result ᐅ " + resultDisplay}</ReactMarkdown>
+                                {"Latest Submission Result ᐅ " + resultDisplay}
 
                                 <ReactMarkdown>{list.ProblemDescription}</ReactMarkdown><br/>
 
@@ -205,7 +204,7 @@ export const ProblemPage = () => {
                                     style={{height: 500, width: 900}}
                                 /><br /><br /><br />
 
-                                <Button type="primary" loading={loadings} onClick={() => SubmitCode(`${id}`)}>
+                                <Button type="primary" loading={loadings} onClick={() => SubmitCode(`${problemID}`)}>
                                     Submit <DoubleRightOutlined />
                                 </Button><br/><br/>
 

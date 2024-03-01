@@ -68,6 +68,13 @@ export const ManageLabs = () => {
             title: 'Lab Name',
             dataIndex: 'LabName',
             key: 'LabName',
+            onCell: (record: any) => {
+                return {
+                    onClick: () => {
+                        goToLabProgress(record.LabID)
+                    },
+                };
+            },
         },
         {
             title: 'Lab Problems',
@@ -133,6 +140,11 @@ export const ManageLabs = () => {
     const goToManageUsers = () => {
         navigate('/AdminDashboard/Users')
     }
+
+    const goToLabProgress = (LabID: String) => {
+        navigate(`/AdminDashboard/LabProgress/${LabID}`)
+    }
+
 
     const logout = () => {
         localStorage.removeItem("token");
