@@ -143,7 +143,6 @@ export const CreateProblem = () => {
                 if (res.data === 'QUEUE_NOT_AVALIBLE') {
                     errorNotify('The server is busy!')
                 } else {
-                    console.log(res.data)
                     setResultList(res.data)
 
                     successNotify('Results are ready to review!')
@@ -151,8 +150,8 @@ export const CreateProblem = () => {
 
                     setTimeout(function timer() {
                             window.scrollTo({top:3300 ,behavior:'smooth'});     
+                            console.log(resultList)
                       }, 500);
-
                 }             
                 toggleLoadTestRun(false)     
             })
@@ -161,7 +160,11 @@ export const CreateProblem = () => {
 
     const StoreToMySQL = () => {
         toggleLoadSaveProblem(true)
-        if (!language) {
+        if (resultList.length === 0) {
+            errorNotify('You need to test your code before saving!')
+            setDisplaying('You need to test your code before saving!')
+            toggleLoadSaveProblem(false)
+        } else if (!language) {
             errorNotify('Please Select your language to test!')
             setDisplaying('Please Select your language to test!')
             toggleLoadSaveProblem(false)
@@ -177,14 +180,13 @@ export const CreateProblem = () => {
             errorNotify('Please write a problem description') 
             setDisplaying('Please write a problem description')
             toggleLoadSaveProblem(false)
-        } else if (language === 'Disabled') {
-            errorNotify('This language is disabled UwU') 
-            setDisplaying('This language is disabled UwU')
-            toggleLoadSaveProblem(false)
         } else {
-            infoNotify('Saving your problem, please stand by...') 
-            setDisplaying('Saving your problem, please stand by...')
             toggleLoadSaveProblem(true)
+
+            //Arr mapping only results
+            const answers = resultList.map(item => {
+                return item.output;
+            });
 
             window.scrollTo({top:0 ,behavior:'smooth'}); 
 
@@ -194,7 +196,7 @@ export const CreateProblem = () => {
                 problemLevel: problemLevel,
                 problemDescription: problemDescription,
                 Testcases: testcases,
-                correctProgram: correctProgram,
+                answers: answers,
             }).then(res => {
                 window.scrollTo({top:0 ,behavior:'smooth'});
                 if (res.data === 'QUEUE_NOT_AVALIBLE') {
@@ -206,8 +208,8 @@ export const CreateProblem = () => {
                     setDisplaying('Problem Saving Error!')
                     toggleLoadSaveProblem(false)
                 } else {
-                    successNotify('The problem is now saved and ready to solve!')
-                    setDisplaying('The problem is now saved and ready to solve!')
+                    successNotify('Problem Save Success!')
+                    setDisplaying('Problem Save Success!')
                     toggleLoadSaveProblem(false)
                 }
             })

@@ -70,7 +70,7 @@ export const ManageUsers = () => {
             key: 'user_name',
         },
         {
-            title: 'Full Name',
+            title: 'Tag',
             dataIndex: 'user_tag',
             key: 'user_tag',
         },
