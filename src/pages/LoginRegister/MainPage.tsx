@@ -1,23 +1,13 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom";
-import { UserDetail } from "../Redux/hook";
 import { Helmet } from 'react-helmet';
 import axios from 'axios';
 import {  Button, 
           Input, 
-          Space, 
           notification, 
           Layout, 
-          Menu, 
+          Form,
        } from 'antd';
-
-import {  EyeInvisibleOutlined, 
-          EyeTwoTone, 
-          UserOutlined, 
-          KeyOutlined, 
-          LoginOutlined,
-          PlusSquareOutlined
-       } from '@ant-design/icons';
 
 const { Header } = Layout;
 
@@ -27,7 +17,6 @@ export const MainPage = () => {
 
     const [reguser, setregUser] = useState('')
     const [regpassword, setregPassword] = useState('')
-    const [regconfirmpassword, setregconfirmPassword] = useState('')
     
     const navigate = useNavigate();
     const BACKEND_API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT
@@ -47,6 +36,12 @@ export const MainPage = () => {
          })
     }, [])
 
+    const [isLoginForm, setIsLoginForm] = useState(true);
+
+    const toggleForm = () => {
+      setIsLoginForm(!isLoginForm);
+    };
+
     const errorNotify = (Arg: string) => {
         notification.error({
             message: 'Error!',
@@ -62,21 +57,14 @@ export const MainPage = () => {
             placement: 'topLeft'
           })
     }
-    
-    const ToggleDisplay = (Arg: string) => {
-        const Regbox = document.getElementById(`Register`);
-        const Loginbox = document.getElementById(`Login`);
-        if (Arg === "Login") {
-            if (Regbox != null && Loginbox != null) {
-                Regbox.style.display = "none"
-                Loginbox.style.display = "block"
-            }
-        } else if (Arg === "Register") {
-            if (Regbox != null && Loginbox != null) {
-                Regbox.style.display = "block"
-                Loginbox.style.display = "none"
-            }       
-    }}
+
+    const onFinish = () => {
+        if (isLoginForm) {
+            Login();
+        } else {
+            Register();
+        }
+      };
 
     const Login = () => {
         if (!username || !password) {
@@ -100,11 +88,9 @@ export const MainPage = () => {
     }
 
     const Register = () => {
-        if (!reguser || !regpassword || !regconfirmpassword) {
+        if (!reguser || !regpassword) {
             errorNotify("Please fill out the forms")
-        } else if (regpassword !== regconfirmpassword) {
-            errorNotify("Password does not match!")
-        } else if (String(regpassword).length < 6 || String(regconfirmpassword).length < 6) {
+        } else if (String(regpassword).length < 6) {
             errorNotify("Password must be at least 6 characters long")
         } else {
             axios.post(`${BACKEND_API_ENDPOINT}/register`, {
@@ -125,116 +111,64 @@ export const MainPage = () => {
     }
 
     return (
-        <div className="MainPageBody">
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
             <Helmet>
                 <title>Lab</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
             </Helmet>
-
-                <Header
-                    style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    }}
-                >
-                    <div className="demo-logo" />
-                    <Menu
-                    theme="dark"
-                    mode="horizontal"
-                    defaultSelectedKeys={['1']}
-                    items={[
-                        {
-                            key: '1',
-                            icon: <LoginOutlined />,
-                            label: 'Login',
-                            onClick: () => ToggleDisplay("Login")
-                        },
-                        {
-                            key: '2',
-                            icon: <PlusSquareOutlined />,
-                            label: 'Register',
-                            onClick: () => ToggleDisplay("Register")
-                        },
-                    ]}
-                    />
-                </Header>
-                <div id="Login" className="RefreshOnLoad" style={{display: "block",margin: 30}}>
-                    <h1 className="LoginAndRegisterTitle">Login</h1>
-                    <Space.Compact
-                        style={{
-                            width: '100%',
-                        }}
-                        >
-                        <Input 
-                            name="input"
-                            size="large" 
-                            placeholder="Username" 
-                            prefix={<UserOutlined />} 
-                            onChange={(e) => setLoginUsername(e.target.value)}
-                            style={{width: 250}}
-                        />
-                        <Input.Password
-                            name="input"
-                            size="large"
-                            placeholder="Password"
-                            iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
-                            prefix={<KeyOutlined />}
-                            onChange={(e) => setLoginPassword(e.target.value)}
-                            value={password}
-                            style={{width: 250}}
-                        />
-                        <Button 
-                            type="primary" 
-                            onClick={Login}
-                            style={{height: 40,width: 40}}
-                            icon={<LoginOutlined />}
-                            />
-                    </Space.Compact>
-                </div>
-                <div id="Register" className="RefreshOnLoad" style={{display: "none",margin: 30}}>
-                    <h1 className="LoginAndRegisterTitle">Register</h1>
-                    <Space.Compact
-                        style={{
-                            width: '100%',
-                        }}
-                        >
-                        <Input 
-                            name="input"
-                            size="large" 
-                            placeholder="Username" 
-                            prefix={<UserOutlined />} 
-                            onChange={(e) => setregUser(e.target.value)}
-                            value={reguser}
-                            style={{width: 250}}
-                        />
-                        <Input.Password
-                            name="input"
-                            size="large"
-                            placeholder="Set a Password"
-                            iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
-                            prefix={<KeyOutlined />}
-                            onChange={(e) => setregPassword(e.target.value)}
-                            value={regpassword}
-                            style={{width: 250}}
-                        />
-                        <Input.Password
-                            name="input"
-                            size="large"
-                            placeholder="Confirm Password"
-                            iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
-                            prefix={<KeyOutlined />}
-                            onChange={(e) => setregconfirmPassword(e.target.value)}
-                            value={regconfirmpassword}
-                            style={{width: 250}}
-                        />
-                        <Button 
-                            type="primary" 
-                            onClick={Register}
-                            style={{height: 40,width: 110}}
-                            icon={<LoginOutlined />}
-                            >Register</Button>
-                    </Space.Compact>
-                </div>
-            </div>
+          <Form
+            name={isLoginForm ? 'login' : 'register'}
+            onFinish={onFinish}
+            style={{ width: 300 }}
+          >
+            <Form.Item
+              label="Username"
+              name="username"
+              rules={[{ required: true, message: 'Please input your username!' }]}
+            >
+              <Input value={isLoginForm ? username : reguser} onChange={(e) => isLoginForm ? setLoginUsername(e.target.value) : setregUser(e.target.value)} />
+            </Form.Item>
+    
+            <Form.Item
+              label="Password"
+              name="password"
+              rules={[{ required: true, message: 'Please input your password!' }]}
+            >
+              <Input.Password value={isLoginForm ? password : regpassword} onChange={(e) => isLoginForm ? setLoginPassword(e.target.value) : setregPassword(e.target.value)} />
+            </Form.Item>
+    
+            {!isLoginForm && (
+              <Form.Item
+                label="Confirm Password"
+                name="confirmPassword"
+                rules={[
+                  { required: true, message: 'Please confirm your password!' },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (!value || getFieldValue('password') === value) {
+                        return Promise.resolve();
+                      }
+                      return Promise.reject('The two passwords do not match!');
+                    },
+                  }),
+                ]}
+              >
+                <Input.Password />
+              </Form.Item>
+            )}
+    
+            <Form.Item>
+              <Button type="primary" htmlType="submit" style={{ width: '100%' }}>
+                {isLoginForm ? 'Login' : 'Register'}
+              </Button>
+            </Form.Item>
+    
+            <Form.Item>
+              <Button type="link" onClick={toggleForm} style={{ width: '100%' }}>
+                {isLoginForm ? 'No Account?, Register' : 'Already have an account?, Login'}
+              </Button>
+            </Form.Item>
+          </Form>
+        </div>
     )
 }

@@ -13,6 +13,8 @@ import {  Button,
     notification, 
     Layout, 
     Select,
+    Modal,
+    Table
  } from 'antd';
 
 import {  
@@ -36,7 +38,9 @@ export const ProblemPage = () => {
     const [code, setCode] = useState('')
 
     const [resultDisplay, setDisplaying] = useState('Click Submit to grading your program')
-    const [explainResult, setExplainResult] = useState('')
+    const [tableData, setTableData] = useState([]);
+
+    const [visible, setVisible] = useState(false);
 
     const [currentProblem, setCurrentProblem] = useState<ProblemDetail[]>([])
 
@@ -84,6 +88,7 @@ export const ProblemPage = () => {
             if (res.data.Result === "None") {
                 setDisplaying("Click Submit to grading your program")
             } else {
+                updateTestData(res.data.Result)
                 if (res.data.isPassed) {
                     enterLoading(false)
                     setDisplaying(`PASSED ✓ [${res.data.Result}]`)
@@ -110,9 +115,9 @@ export const ProblemPage = () => {
         if (!language) {
             errorNotify("Please select language to submit!")
         } else {
-            setExplainResult('')
             enterLoading(true)
-            setDisplaying(`In queue...`)
+            setDisplaying(`🕒 Judging...`)
+            updateTestData('NO')
             window.scrollTo({top:0 ,behavior:'smooth'}); 
             axios.post(`${BACKEND_API_ENDPOINT}/Grading`, {
                 code: code,
@@ -125,7 +130,7 @@ export const ProblemPage = () => {
                 } else if (res.data === 'ERROR WHILE SELECT PROBLEMS!') {
                     errorNotify("Problem does not exist")
                 } else{
-                    setExplainResult(res.data.explainResult)
+                    updateTestData(res.data.gradingResult)
                     if (res.data.isPassed) {
                         enterLoading(false)
                         setDisplaying(`PASSED ✓ [${res.data.gradingResult}]`)
@@ -144,6 +149,50 @@ export const ProblemPage = () => {
             navigate("/MainPage")
         }, 150);        
     }
+
+    const columns = [
+        {
+          title: 'Test #',
+          dataIndex: 'testNumber',
+          key: 'testNumber',
+        },
+        {
+          title: 'Result',
+          dataIndex: 'result',
+          key: 'result',
+        },
+        {
+          title: 'Meaning',
+          dataIndex: 'meaning',
+          key: 'meaning',
+        },
+    ];
+
+    const updateTestData = (newResult: any) => {
+        if (newResult === 'NO') {
+            setTableData([]);
+        } else {
+            const newTestData = newResult.split('').map((status: any, index: any) => ({
+                key: index.toString(),
+                testNumber: index + 1,
+                result: status,
+                meaning: status === 'P' ? 'Passed' : 'Failed',
+              }));
+            setTableData(newTestData);
+        }
+    };
+
+    const showModal = () => {
+        setVisible(true);
+    };
+    
+    const handleOk = () => {
+        setVisible(false);
+    };
+    
+    const handleCancel = () => {
+        setVisible(false);
+    };
 
     return (
         <div> 
@@ -192,7 +241,13 @@ export const ProblemPage = () => {
                                     Level {list.ProblemLevel}
                                 </span><br />
 
-                                {"Latest Submission Result ᐅ " + resultDisplay}
+                                {"Latest Submission Result ᐅ " + resultDisplay + " "}
+
+                                {tableData.length > 0 && (
+                                    <Button type="primary" size="small" onClick={showModal}>
+                                    Result Explaination
+                                    </Button>
+                                )}
 
                                 <ReactMarkdown>{list.ProblemDescription}</ReactMarkdown><br/>
 
@@ -207,6 +262,16 @@ export const ProblemPage = () => {
                                 <Button type="primary" loading={loadings} onClick={() => SubmitCode(`${problemID}`)}>
                                     Submit <DoubleRightOutlined />
                                 </Button><br/><br/>
+
+                                <Modal
+                                    title="Result Explaination"
+                                    visible={visible}
+                                    onOk={handleOk}
+                                    onCancel={handleCancel}
+                                    bodyStyle={{ maxHeight: 500, overflowY: 'auto' }}
+                                >
+                                    <Table columns={columns} dataSource={tableData} pagination={false} />
+                                </Modal>
 
                                 <Select 
                                     onChange={setLanguage}
@@ -244,8 +309,6 @@ export const ProblemPage = () => {
                                         },
                                     ]}
                                 /><br/><br/>
-                                
-                                <div dangerouslySetInnerHTML={{ __html: explainResult }} />
                                 
                             </div>
                         ))                
