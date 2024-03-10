@@ -152,19 +152,34 @@ export const ProblemPage = () => {
 
     const columns = [
         {
-          title: 'Test #',
-          dataIndex: 'testNumber',
-          key: 'testNumber',
+            title: 'Test #',
+            dataIndex: 'testNumber',
+            key: 'testNumber',
+            width: 100,
         },
         {
-          title: 'Result',
-          dataIndex: 'result',
-          key: 'result',
+            title: 'Result',
+            dataIndex: 'result',
+            key: 'result',
+            width: 50,
         },
         {
-          title: 'Meaning',
-          dataIndex: 'meaning',
-          key: 'meaning',
+            title: 'Meaning',
+            dataIndex: 'meaning',
+            key: 'meaning',
+            width: 100,
+        },
+        {
+            title: 'Input',
+            dataIndex: 'input',
+            key: 'input',
+            width: 175,
+        },
+        {
+            title: 'Hint',
+            dataIndex: 'hint',
+            key: 'hint',
+            width: 175,
         },
     ];
 
@@ -177,6 +192,8 @@ export const ProblemPage = () => {
                 testNumber: index + 1,
                 result: status,
                 meaning: status === 'P' ? 'Passed' : 'Failed',
+                input: "-",
+                hint: "-"
               }));
             setTableData(newTestData);
         }
@@ -269,8 +286,9 @@ export const ProblemPage = () => {
                                     onOk={handleOk}
                                     onCancel={handleCancel}
                                     bodyStyle={{ maxHeight: 500, overflowY: 'auto' }}
+                                    width={600}
                                 >
-                                    <Table columns={columns} dataSource={tableData} pagination={false} />
+                                    <Table columns={columns} dataSource={tableData} pagination={false}/>
                                 </Modal>
 
                                 <Select 
