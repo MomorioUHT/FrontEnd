@@ -27,10 +27,10 @@ import {
     ForwardOutlined
  } from '@ant-design/icons';
 
-import { useProblemsQuery,useDeleteProblemMutation } from "../Redux/Api";
+import { useProblemsQuery } from "../Redux/Api";
 
 const { Header, Sider, Content, Footer } = Layout;
-
+ 
 export const CreateLab = () => {
     const navigate = useNavigate();
 

@@ -14,7 +14,7 @@ import {
     LogoutOutlined,
  } from '@ant-design/icons';
 
-const { Header, Sider, Content, Footer } = Layout;
+const { Header, Content, Footer } = Layout;
 
 export const LabPage = () => {
 

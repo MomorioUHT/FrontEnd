@@ -28,7 +28,6 @@ export const Home = () => {
     const [role, setRole] = useState('')
 
     const [collapsed, setCollapsed] = useState(false);
-    const [problemList, setProblemList] = useState<ProblemDetail[]>([])
     const [labList, setLablist] = useState<LabDetail[]>([])
 
     const BACKEND_API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT
@@ -46,31 +45,6 @@ export const Home = () => {
                 };
             },
         },
-    ];
-
-    const columnsAll = [
-        {
-            title: 'Problem Name',
-            dataIndex: 'ProblemName',
-            key: 'ProblemName',
-            onCell: (record: any) => {
-                return {
-                    onClick: () => {
-                        gotoproblem(record.ProblemID);
-                    },
-                };
-            },
-        },
-        {
-            title: 'Level',
-            dataIndex: 'ProblemLevel',
-            key: 'ProblemLevel',
-        },
-        {
-            title: 'Problem ID',
-            dataIndex: 'ProblemID',
-            key: 'ProblemID',
-        }
     ];
     
     useEffect(() => {
@@ -105,10 +79,6 @@ export const Home = () => {
 
     const gotoLab = (LabID: String) => {
         navigate(`/Labs/${LabID}`)
-    }
-
-    const gotoproblem = (problemID: String) => {
-        navigate(`/task/${problemID}`)
     }
 
     const gotoadmin = () => {
