@@ -8,7 +8,6 @@ automatic grading system powered by Antd CSS and React Framework<br/>
 ```
 REACT_APP_API_ENDPOINT={Replace with your backend's IP}
 ```
-A
 
 ## Main Page
 * Navigate to ```/Lab```
