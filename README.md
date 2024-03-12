@@ -8,6 +8,13 @@ automatic grading system powered by Antd CSS and React Framework<br/>
 ```
 REACT_APP_API_ENDPOINT={Replace with your backend's IP}
 ```
+
+## Main Page
+* Navigate to ```/Lab```
+* create your account here
+* for admins you need to create an Admin user via backend only (Not avalible through frontend)
+![Login](/info-images/Login.png)
+
 ## Home Page
 * view current labs that has been created
 ![Home page](/info-images/Homepage.png)
