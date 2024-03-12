@@ -58,7 +58,7 @@ export const ManageUsers = () => {
                     navigate('/Home')
                 }
             } else {
-                navigate('/MainPage')
+                navigate('/Lab')
             }
          })
     }, [])
@@ -137,7 +137,7 @@ export const ManageUsers = () => {
     const logout = () => {
         localStorage.removeItem("token");
         setTimeout(function timer() {
-            navigate("/MainPage")
+            navigate("/Lab")
         }, 150);        
     }
 

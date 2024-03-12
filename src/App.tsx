@@ -15,16 +15,16 @@ function App() {
   return (
     <div>
       <Routes>
-      <Route path="/" element={<Navigate to="/MainPage" replace={true} />} />
+      <Route path="/" element={<Navigate to="/Lab" replace={true} />} />
         <Route path="Home" element={<Home />} />
-        <Route path="MainPage" element={<MainPage />} />
+        <Route path="Lab" element={<MainPage />} />
         <Route path="AdminDashboard" element={<Navigate to="/AdminDashboard/CreateProblem" replace={true} />}/>
         <Route path="AdminDashboard/Users" element={<ManageUsers />} />
         <Route path="AdminDashboard/ManageProblems" element={<ManageProblem />} />
         <Route path="AdminDashboard/CreateProblem" element={<CreateProblem />} />
         <Route path="AdminDashboard/CreateLab" element={<CreateLab />} />
         <Route path="task/:problemID" element={<ProblemPage />} />
-        <Route path="Lab/:LabName" element={<LabPage />} />
+        <Route path="Labs/:LabName" element={<LabPage />} />
         <Route path="AdminDashboard/ManageLabs" element={<ManageLabs />} />
         <Route path="AdminDashboard/LabProgress/:LabName2" element={<LabProgressPage />} />
       </Routes>

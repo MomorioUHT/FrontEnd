@@ -63,7 +63,7 @@ export const CreateLab = () => {
                     navigate('/Home')
                 }
             } else {
-                navigate('/MainPage')
+                navigate('/Lab')
             }
          })
     }, [])
@@ -193,10 +193,9 @@ export const CreateLab = () => {
     const logout = () => {
         localStorage.removeItem("token");
         setTimeout(function timer() {
-            navigate("/MainPage")
+            navigate('/Lab')
         }, 150);        
     }
-
 
     return (
         <div> 

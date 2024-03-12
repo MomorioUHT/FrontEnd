@@ -77,7 +77,7 @@ export const LabPage = () => {
                 settag(res.data.userTag)
                 setRole(res.data.userRole)
             } else {
-                navigate('/MainPage')
+                navigate('/Lab')
             }
          })
 
@@ -103,7 +103,7 @@ export const LabPage = () => {
     const logout = () => {
         localStorage.removeItem("token");
         setTimeout(function timer() {
-            navigate("/MainPage")
+            navigate("/Lab")
         }, 150);        
     }
 

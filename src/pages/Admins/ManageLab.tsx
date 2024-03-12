@@ -58,7 +58,7 @@ export const ManageLabs = () => {
                     navigate('/Home')
                 }
             } else {
-                navigate('/MainPage')
+                navigate('/Lab')
             }
          })
     }, [])
@@ -149,7 +149,7 @@ export const ManageLabs = () => {
     const logout = () => {
         localStorage.removeItem("token");
         setTimeout(function timer() {
-            navigate("/MainPage")
+            navigate("/Lab")
         }, 150);        
     }
 

@@ -44,8 +44,11 @@ export const LabProgressPage = () => {
             if (res.data.message === "AUTHENTICATED") {
                 setUsername(res.data.username)
                 settag(res.data.userTag)
+                if (res.data.userRole !== "Admin") {
+                    navigate('/Home')
+                }
             } else {
-                navigate('/MainPage')
+                navigate('/Lab')
             }
          })
 
@@ -82,7 +85,7 @@ export const LabProgressPage = () => {
     const logout = () => {
         localStorage.removeItem("token");
         setTimeout(function timer() {
-            navigate("/MainPage")
+            navigate('/Lab')
         }, 150);        
     }
 

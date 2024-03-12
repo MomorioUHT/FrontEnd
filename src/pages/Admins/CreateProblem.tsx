@@ -114,7 +114,7 @@ export const CreateProblem = () => {
                     navigate('/Home')
                 }
             } else {
-                navigate('/MainPage')
+                navigate('/Lab')
             }
          })
     }, [])
@@ -247,7 +247,7 @@ export const CreateProblem = () => {
     const logout = () => {
         localStorage.removeItem("token");
         setTimeout(function timer() {
-            navigate("/MainPage")
+            navigate('/Lab')
         }, 150);        
     }
 
@@ -381,21 +381,6 @@ export const CreateProblem = () => {
                                     {
                                     value: 'C++',
                                     label: 'C++',
-                                    disabled: true,
-                                    },
-                                    {
-                                    value: 'C#',
-                                    label: 'C#',
-                                    disabled: true,
-                                    },
-                                    {
-                                    value: 'Java',
-                                    label: 'Java',
-                                    disabled: true,
-                                    },
-                                    {
-                                    value: 'Visual Basic',
-                                    label: 'Visual Basic',
                                     disabled: true,
                                     },
                                 ]}

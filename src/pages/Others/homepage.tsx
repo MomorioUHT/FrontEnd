@@ -79,23 +79,14 @@ export const Home = () => {
                 'access-token': localStorage.getItem("token")
             }
         }).then(res => { 
-            console.log(res)
             if (res.data.message === "AUTHENTICATED") {
                 setUsername(res.data.username)
                 settag(res.data.userTag)
                 setRole(res.data.userRole)
             } else {
-                navigate('/MainPage')
+                navigate('/Lab')
             }
          })
-
-        axios.get<ProblemDetail[] | "GET_PROBLEM_ERROR">(`${BACKEND_API_ENDPOINT}/Problems`).then(res => {
-            if (res.data === "GET_PROBLEM_ERROR") {
-                alert("Get Problem List Error!")
-            } else {
-                setProblemList(res.data)
-            }
-        })
 
         axios.get<LabDetail[] | "GET_LAB_ERROR">(`${BACKEND_API_ENDPOINT}/labs`).then(res => {
             if (res.data !== "GET_LAB_ERROR") {
@@ -108,12 +99,12 @@ export const Home = () => {
     const logout = () => {
         localStorage.removeItem("token");
         setTimeout(function timer() {
-            navigate("/MainPage")
+            navigate("/Lab")
         }, 150);        
     }
 
     const gotoLab = (LabID: String) => {
-        navigate(`/Lab/${LabID}`)
+        navigate(`/Labs/${LabID}`)
     }
 
     const gotoproblem = (problemID: String) => {

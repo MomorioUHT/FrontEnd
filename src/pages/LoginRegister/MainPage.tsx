@@ -9,8 +9,6 @@ import {  Button,
           Form,
        } from 'antd';
 
-const { Header } = Layout;
-
 export const MainPage = () => {
     const [username, setLoginUsername] = useState('')
     const [password, setLoginPassword] = useState('')
@@ -31,7 +29,7 @@ export const MainPage = () => {
             if (res.data.message === "AUTHENTICATED") {
                 navigate('/home')
             } else {
-                navigate('/MainPage')
+                navigate('/Lab')
             }
          })
     }, [])

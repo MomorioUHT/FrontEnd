@@ -62,7 +62,7 @@ export const ProblemPage = () => {
                 settag(res.data.userTag)
                 getSubmitResult(res.data.username)
             } else {
-                navigate('/MainPage')
+                navigate('/Lab')
             }
          })
 
@@ -91,10 +91,10 @@ export const ProblemPage = () => {
                 updateTestData(res.data.Result)
                 if (res.data.isPassed) {
                     enterLoading(false)
-                    setDisplaying(`PASSED ✓ [${res.data.Result}]`)
+                    setDisplaying(`PASSED ✅︎ [${res.data.Result}]`)
                 } else {
                     enterLoading(false)
-                    setDisplaying(`FAILED ✗ [${res.data.Result}]`)
+                    setDisplaying(`FAILED 🞮 [${res.data.Result}]`)
                 }
             }
         }) 
@@ -133,10 +133,10 @@ export const ProblemPage = () => {
                     updateTestData(res.data.gradingResult)
                     if (res.data.isPassed) {
                         enterLoading(false)
-                        setDisplaying(`PASSED ✓ [${res.data.gradingResult}]`)
+                        setDisplaying(`PASSED ✅︎ [${res.data.gradingResult}]`)
                     } else {
                         enterLoading(false)
-                        setDisplaying(`FAILED ✗ [${res.data.gradingResult}]`)
+                        setDisplaying(`FAILED 🞮 [${res.data.gradingResult}]`)
                     }
                 }
             })
@@ -146,7 +146,7 @@ export const ProblemPage = () => {
     const logout = () => {
         localStorage.removeItem("token");
         setTimeout(function timer() {
-            navigate("/MainPage")
+            navigate("/Lab")
         }, 150);        
     }
 
@@ -308,21 +308,6 @@ export const ProblemPage = () => {
                                         {
                                         value: 'C++',
                                         label: 'C++',
-                                        disabled: true,
-                                        },
-                                        {
-                                        value: 'C#',
-                                        label: 'C#',
-                                        disabled: true,
-                                        },
-                                        {
-                                        value: 'Java',
-                                        label: 'Java',
-                                        disabled: true,
-                                        },
-                                        {
-                                        value: 'Visual Basic',
-                                        label: 'Visual Basic',
                                         disabled: true,
                                         },
                                     ]}
