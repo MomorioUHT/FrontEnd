@@ -22,24 +22,3 @@ jobs:
           platforms: linux/arm64/v8
           cache-from: type=gha
           cache-to: type=gha,mode=max
-  deploy_docker:
-    runs-on: ubuntu-latest
-    name: Deploy Docker To Server
-    needs: build_docker_image
-    steps:
-      - uses: actions/checkout@v3
-      - uses: benjlevesque/short-sha@v2.2
-        id: short-sha
-        with:
-          length: 6
-      - uses: fifsky/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          user: ubuntu
-          key: ${{ secrets.KEY }}
-          command: |
-            docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
-            docker pull glacier23/lab01website:${{ steps.short-sha.outputs.sha }}
-            docker rm -f lab01website || true
-            docker run --network lab01network --name lab01website --env REACT_APP_API_ENDPOINT=http://lab.skytalemc.com:8000 -p 3000:3000 -d glacier23/lab01website:${{ steps.short-sha.outputs.sha }}
-            docker image prune -af
