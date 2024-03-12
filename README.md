@@ -1,9 +1,13 @@
-# Lab
+# Lab (FrontEnd Section)
 
 The Lab is the coding website, perfect for schools and universites<br/>
 to use it with students to assign coding task, provided with <br/>
-automatic grading system<br/>
+automatic grading system powered by Antd CSS and React Framework<br/>
 
+#### dotenv
+```
+REACT_APP_API_ENDPOINT={Replace with your backend's IP}
+```
 ## Home Page
 * view current labs that has been created
 ![Home page](/info-images/Homepage.png)
