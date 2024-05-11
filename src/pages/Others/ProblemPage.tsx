@@ -110,13 +110,13 @@ export const ProblemPage = () => {
     const enterLoading = (value: boolean) => {
         setLoadings(value);
     }
-
+    
     const SubmitCode = (ProblemID: String) => {
         if (!language) {
             errorNotify("Please select language to submit!")
         } else {
             enterLoading(true)
-            setDisplaying(`🕒 Judging...`)
+            setDisplaying(`🕒 Grading...`)
             updateTestData('NO')
             window.scrollTo({top:0 ,behavior:'smooth'}); 
             axios.post(`${BACKEND_API_ENDPOINT}/Grading`, {
